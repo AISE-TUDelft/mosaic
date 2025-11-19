@@ -1,1 +1,1 @@
-# MOSAIC---Dashboard
+# MOSAIC-Dashboard
