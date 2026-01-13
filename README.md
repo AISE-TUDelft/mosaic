@@ -8,6 +8,8 @@ Our lab's mission is advance interdisciplinary approaches for building and asses
 
 ## Getting Started
 
+### Frontend
+
 Ensure that you have npm and node installed. After that, run the following commands:
 ```bash
 npm install
