@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <main className="relative min-h-screen bg-[#0a0e17] text-white overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-20"
         style={{ backgroundImage: "url('/background.png')" }}
       />
 

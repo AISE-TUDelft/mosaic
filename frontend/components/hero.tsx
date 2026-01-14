@@ -1,3 +1,5 @@
+import { DashboardBento } from "./dashboard-bento";
+
 export function Hero() {
     return (
       <section className="flex flex-col items-center justify-center px-6 pt-24 pb-32 md:pt-32 md:pb-48 text-center">
@@ -14,7 +16,11 @@ export function Hero() {
           software engineering systems that operate in real development workflows and measurably improve software
           efficiency and developer productivity.
         </p>
+        <div className="w-full mt-12 min-h-[600px]">
+          <DashboardBento />
+        </div>
       </section>
+
     )
   }
   
