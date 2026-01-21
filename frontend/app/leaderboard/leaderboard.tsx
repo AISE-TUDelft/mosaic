@@ -1,8 +1,8 @@
 "use client"
 
-import { BentoGrid, BentoGridItem } from "./bento-grid"
+import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, COLORS } from "@/components/charts"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, COLORS } from "@/components/ui/charts"
 
 // Sample data
 const lineData = [
@@ -45,7 +45,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function DashboardBento() {
+export function Leaderboard() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="mb-8 text-3xl font-bold text-white">Analytics Dashboard</h1>
@@ -55,8 +55,11 @@ export function DashboardBento() {
         <BentoGridItem colSpan={2} rowSpan={2}>
           <div className="flex h-full flex-col">
             <h3 className="mb-2 text-xl font-semibold text-white">Monthly Trends</h3>
-            <p className="mb-4 text-sm text-gray-400">
+            <p className="mb-2 text-sm text-gray-400">
               Performance over the last 6 months
+            </p>
+            <p className="mb-4 text-xs text-gray-500">
+              This chart displays the overall performance metrics across desktop and mobile platforms over a six-month period. Track how different channels contribute to your total engagement and identify seasonal patterns in user behavior.
             </p>
             <ChartContainer config={chartConfig} className="h-full w-full">
               <AreaChart data={areaData}>
@@ -110,6 +113,9 @@ export function DashboardBento() {
         <BentoGridItem>
           <div className="flex h-full flex-col">
             <h3 className="mb-2 text-lg font-semibold text-white">Agent Performance</h3>
+            <p className="mb-3 text-xs text-gray-500">
+              Compare performance metrics across different AI agents. Evaluate their efficiency and effectiveness in completing assigned tasks and identify top performers.
+            </p>
             <ChartContainer config={chartConfig} className="h-full w-full">
               <BarChart data={barData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -133,7 +139,10 @@ export function DashboardBento() {
         <BentoGridItem colSpan={2}>
           <div className="flex h-full flex-col">
             <h3 className="mb-2 text-lg font-semibold text-white">Growth Rate</h3>
-            <p className="mb-4 text-sm text-gray-400">Monthly progression</p>
+            <p className="mb-2 text-sm text-gray-400">Monthly progression</p>
+            <p className="mb-4 text-xs text-gray-500">
+              Visualize the consistent growth trend over time. This metric helps identify acceleration patterns and predict future performance based on historical data trajectories and market indicators.
+            </p>
             <ChartContainer config={chartConfig} className="h-full w-full">
               <LineChart data={lineData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -178,8 +187,11 @@ export function DashboardBento() {
         <BentoGridItem colSpan={3}>
           <div className="flex h-full flex-col">
             <h3 className="mb-2 text-xl font-semibold text-white">Detailed Analytics</h3>
-            <p className="mb-4 text-sm text-gray-400">
+            <p className="mb-2 text-sm text-gray-400">
               Comprehensive view across all metrics
+            </p>
+            <p className="mb-4 text-xs text-gray-500">
+              Detailed breakdown of all tracked metrics and KPIs combined into a single comprehensive dashboard. Use this view to make data-driven decisions and monitor system health across the entire platform in real-time.
             </p>
             <ChartContainer config={chartConfig} className="h-full w-full">
               <LineChart data={lineData}>

@@ -69,8 +69,9 @@ const ChartTooltipContent = React.forwardRef<
     active?: boolean
     payload?: Array<any>
     label?: string | number
+    allowEscapeViewBox?: boolean
   }
->(({ active, payload, label, className, ...props }, ref) => {
+>(({ active, payload, label, className, allowEscapeViewBox, ...props }, ref) => {
   if (!active || !payload || payload.length === 0) {
     return null
   }

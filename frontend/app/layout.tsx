@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 // import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
+import { Header } from "@/components/header"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -39,7 +40,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        {children}
+         <main className="relative min-h-screen bg-[#0a0e17] text-white overflow-hidden">
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-20"
+                style={{ backgroundImage: "url('/background.png')" }}
+              />    
+              <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-transparent to-[#0a0e17]/90" />      
+              {/* Content */}
+              <div className="relative z-10">
+                <Header />
+                {children}
+              </div>
+            </main>
       </body>
     </html>
   )
