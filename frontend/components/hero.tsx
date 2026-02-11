@@ -6,6 +6,11 @@ import { InteractiveLogo } from "./interactive-logo"
 import "../styles/glass-button.css"
 import "../styles/affiliation.css"
 
+// utils/getAssetPath.ts
+export const getAssetPath = (file: string) => {
+  return process.env.NODE_ENV === 'production' ? `/mosaic/${file}` : `/${file}`
+}
+
 export function Hero() {
   return (
     <>
@@ -47,7 +52,7 @@ export function Hero() {
         <div className="flex items-center justify-between w-full max-w-7xl px-8 h-full">
           <div className="flex items-center h-full flex-1 justify-center pb-3">
             <img 
-              src="/mosaic/international-logo_white_rgb@16x.png" 
+              src={getAssetPath("international-logo_white_rgb@16x.png")} 
               alt="International Logo" 
               className="h-35 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
@@ -55,7 +60,7 @@ export function Hero() {
           </div>
           <div className="flex items-center h-full flex-1 justify-center pt-2">
             <img 
-              src="/mosaic/ucdavislogowhite.png" 
+              src={getAssetPath("ucdavislogowhite.png")} 
               alt="UC Davis Logo" 
               className="h-23 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
@@ -63,7 +68,7 @@ export function Hero() {
           </div>
           <div className="flex items-center h-full flex-1 justify-center pt-1">
             <img 
-              src="/mosaic/githublogowhite.png" 
+              src={getAssetPath("githublogowhite.png")} 
               alt="GitHub Logo" 
               className="h-10 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
