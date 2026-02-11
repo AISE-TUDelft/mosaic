@@ -2,9 +2,7 @@ name: Deploy MOSAIC to GitHub Pages
 
 on:
   push:
-    branches:
-        - main
-        - frontend
+    branches: ["frontend"]
 
 permissions:
   contents: read
