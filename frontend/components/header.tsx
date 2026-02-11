@@ -4,13 +4,8 @@ import Image from "next/image"
 export function Header() {
   return (
     <header className="flex items-center justify-between px-8 py-10 md:px-16 lg:px-24">
-      <Link href="/" className="flex items-center">
-        <img 
-          src="/mosaiclogo4.png" 
-          alt="MOSAIC" 
-          className="h-4 w-auto"
-          style={{ imageRendering: 'crisp-edges' }}
-        />
+      <Link href="/" className="text-xl font-bold tracking-wide text-white">
+        MOSAIC
       </Link>
 
       <nav className="flex items-center gap-12">

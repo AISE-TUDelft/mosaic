@@ -1,0 +1,102 @@
+.interactive-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+}
+
+.logo-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 640px;
+  max-height: 640px;
+}
+
+.mosaic-tile-svg {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.mosaic-tile-svg.active {
+  cursor: pointer;
+}
+
+.mosaic-tile-svg.active:hover,
+.mosaic-tile-svg.active.hovered {
+  fill: #4a8bc2;
+  stroke: #7aa8d4;
+}
+
+/* Animation keyframes - appear */
+@keyframes tileAppear {
+  0% {
+    transform: translateY(-20px) scale(0.8);
+    fill: #2d5a8f;
+    stroke: #4a7daa;
+    opacity: 0;
+    filter: drop-shadow(0 0 0px rgba(74, 139, 194, 0));
+  }
+  50% {
+    transform: translateY(-12px) scale(1.08);
+    fill: #5a9fd4;
+    stroke: #7aa8d4;
+    opacity: 1;
+    filter: drop-shadow(0 0 16px rgba(74, 139, 194, 0.8)) drop-shadow(0 -4px 12px rgba(74, 139, 194, 0.6));
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    fill: #2d5a8f;
+    stroke: #4a7daa;
+    opacity: 1;
+    filter: drop-shadow(0 2px 4px rgba(74, 139, 194, 0.3));
+  }
+}
+
+/* Animation keyframes - disappear */
+@keyframes tileDisappear {
+  0% {
+    transform: translateY(0) scale(1);
+    fill: #2d5a8f;
+    stroke: #4a7daa;
+    opacity: 1;
+    filter: drop-shadow(0 2px 4px rgba(74, 139, 194, 0.3));
+  }
+  50% {
+    transform: translateY(-12px) scale(1.08);
+    fill: #5a9fd4;
+    stroke: #7aa8d4;
+    opacity: 1;
+    filter: drop-shadow(0 0 16px rgba(74, 139, 194, 0.8)) drop-shadow(0 -4px 12px rgba(74, 139, 194, 0.6));
+  }
+  100% {
+    transform: translateY(-20px) scale(0.8);
+    fill: #2d5a8f;
+    stroke: #4a7daa;
+    opacity: 0;
+    filter: drop-shadow(0 0 0px rgba(74, 139, 194, 0));
+  }
+}
+
+.mosaic-tile-svg.active.appearing {
+  animation: tileAppear 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.mosaic-tile-svg.active.disappearing {
+  animation: tileDisappear 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .logo-svg {
+    max-width: 520px;
+    max-height: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .logo-svg {
+    max-width: 420px;
+    max-height: 420px;
+  }
+}
