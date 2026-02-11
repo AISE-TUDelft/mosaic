@@ -60,7 +60,7 @@ export function Hero() {
           </div>
           <div className="flex items-center h-full flex-1 justify-center pt-2">
             <img 
-              src={getAssetPath("ucdavislogowhite.png")} 
+              src="ucdavislogowhite.png" 
               alt="UC Davis Logo" 
               className="h-23 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
