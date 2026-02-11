@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { DashboardBento } from "./leaderboard"
+// import { DashboardBento } from "./leaderboard"
 import { InteractiveLogo } from "./interactive-logo"
 import "../styles/glass-button.css"
 import "../styles/affiliation.css"
