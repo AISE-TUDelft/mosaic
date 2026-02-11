@@ -47,7 +47,7 @@ export function Hero() {
         <div className="flex items-center justify-between w-full max-w-7xl px-8 h-full">
           <div className="flex items-center h-full flex-1 justify-center pb-3">
             <img 
-              src="/international-logo_white_rgb@16x.png" 
+              src="/mosaic/international-logo_white_rgb@16x.png" 
               alt="International Logo" 
               className="h-35 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
@@ -55,7 +55,7 @@ export function Hero() {
           </div>
           <div className="flex items-center h-full flex-1 justify-center pt-2">
             <img 
-              src="/ucdavislogowhite.png" 
+              src="/mosaic/ucdavislogowhite.png" 
               alt="UC Davis Logo" 
               className="h-23 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
@@ -63,7 +63,7 @@ export function Hero() {
           </div>
           <div className="flex items-center h-full flex-1 justify-center pt-1">
             <img 
-              src="/githublogowhite.png" 
+              src="/mosaic/githublogowhite.png" 
               alt="GitHub Logo" 
               className="h-10 w-auto object-contain"
               style={{ imageRendering: 'crisp-edges' }}
