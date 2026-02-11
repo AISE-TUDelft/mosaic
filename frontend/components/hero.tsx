@@ -2,69 +2,156 @@
 
 import Link from "next/link"
 import { DashboardBento } from "./leaderboard"
+import "../styles/glass-button.css"
 
 export function Hero() {
   return (
     <>
-      <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] flex flex-col items-center justify-start px-6 text-center pt-12 sm:pt-16 md:pt-20 lg:pt-24 pb-12 sm:pb-16 md:pb-20">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-light tracking-wider mb-4 bg-gradient-to-b from-[#4a8bc2] to-[#2a5a8a] bg-clip-text text-transparent">
-          AISE
-        </h1>
+      <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-screen flex items-start justify-start px-6 md:px-12 lg:px-24 pt-40">
+        <div className="flex w-full gap-12 max-w-7xl mx-auto items-start">
+          <div className="max-w-2xl flex-shrink-0">
+            <Link href="/" className="flex items-center">
+              <img 
+                src="/mosaiclogo5.png" 
+                alt="MOSAIC" 
+                className="h-15 w-auto"
+                style={{ imageRendering: 'crisp-edges' }}
+              />
+            </Link>
 
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white mb-8">
-          AI for Software Engineering
-        </h2>
+            <h2 className="text-4xl md:text-6xl lg:text-4xl font-light tracking-tight text-white mb-8 max-w-3xl pt-5">
+              Monitoring Open-Source Autonomous Agentic Activity in Collaborative Coding Environments
+            </h2>
 
-        <p className="max-w-2xl text-gray-300 text-base md:text-lg leading-relaxed text-balance">
-          Our lab's mission is advance interdisciplinary approaches for building and assessing trustworthy AI-enabled
-          software engineering systems that operate in real development workflows and measurably improve software
-          efficiency and developer productivity.
-        </p>
+            <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+              MOSAIC brings real-world visibility to autonomous coding agents. Our approach democratizes agentic evaluation and supports the development of trustworthy AI-powered software engineering systems.
+            </p>
+            <div className="mt-8">
+              <Link href="/contact" className="glass-button">
+                Inquiries
+              </Link>
+            </div>
+          </div>
+          
+          <div className="hidden lg:flex flex-1 h-96 bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-lg border border-gray-700 items-center justify-center flex-shrink-0">
+            <p className="text-gray-500">Logo</p>
+          </div>
+        </div>
+      </section>
+{/* We monitor agent activity in open-source collaborative coding environments, delivering transparent, real-world insight into agent behavior and collaboration. */}
+      {/* Sponsors/Partnership Band */}
+      <section className="w-full bg-gradient-to-r from-gray-900/50 via-gray-800/50 to-gray-900/50 border-y border-gray-700 py-0 flex items-center justify-center h-20 -mt-10">
+        <div className="flex items-center justify-between w-full max-w-7xl px-8 h-full">
+          <div className="flex items-center h-full flex-1 justify-center pb-3">
+            <img 
+              src="/international-logo_white_rgb@16x.png" 
+              alt="International Logo" 
+              className="h-35 w-auto object-contain"
+              style={{ imageRendering: 'crisp-edges' }}
+            />
+          </div>
+          <div className="flex items-center h-full flex-1 justify-center pt-2">
+            <img 
+              src="/ucdavislogowhite.png" 
+              alt="UC Davis Logo" 
+              className="h-23 w-auto object-contain"
+              style={{ imageRendering: 'crisp-edges' }}
+            />
+          </div>
+          <div className="flex items-center h-full flex-1 justify-center pt-1">
+            <img 
+              src="/githublogowhite.png" 
+              alt="GitHub Logo" 
+              className="h-10 w-auto object-contain"
+              style={{ imageRendering: 'crisp-edges' }}
+            />
+          </div>
+        </div>
       </section>
 
       {/* Pages Navigation Section */}
-      <section className="px-6 py-32 md:px-16 lg:px-24">
-        <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center mb-16">
-          Explore Our Work
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* About Us Card */}
-          <Link href="/about" className="group">
-            <div className="h-full p-8 rounded-lg border border-gray-700 hover:border-[#4a8bc2] transition-all duration-300 hover:shadow-lg hover:shadow-[#4a8bc2]/20 cursor-pointer bg-gradient-to-br from-gray-900/50 to-gray-800/50">
-              <h3 className="text-2xl font-semibold text-white mb-3 group-hover:text-[#4a8bc2] transition-colors">
-                About Us
-              </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Learn more about our research lab, our team, and the interdisciplinary approaches we use to advance AI-enabled software engineering.
+      <section className="px-6 py-85 md:px-16 lg:px-24">
+        
+        {/* Agent Monitor Section */}
+        <div className="mb-85">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-6">
+                Agent Monitor
+              </h2>
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8">
+                Real-time monitoring of autonomous coding agents. Track agent behavior, performance metrics, and collaborative interactions in open-source environments.
               </p>
+              <Link href="/mosaic" className="glass-button-standard">
+                Explore Agent Monitor
+              </Link>
             </div>
-          </Link>
-
-          {/* Studies Card */}
-          <Link href="/studies" className="group">
-            <div className="h-full p-8 rounded-lg border border-gray-700 hover:border-[#4a8bc2] transition-all duration-300 hover:shadow-lg hover:shadow-[#4a8bc2]/20 cursor-pointer bg-gradient-to-br from-gray-900/50 to-gray-800/50">
-              <h3 className="text-2xl font-semibold text-white mb-3 group-hover:text-[#4a8bc2] transition-colors">
-                Studies
-              </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Explore our latest research studies and empirical findings on trustworthy AI systems and software engineering practices.
-              </p>
+            <div className="h-80 bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-lg border border-gray-700 flex items-center justify-center">
+              <p className="text-gray-500">Interactive Plot or Image</p>
             </div>
-          </Link>
-
-          {/* Leaderboard Card */}
-          <Link href="/leaderboard" className="group">
-            <div className="h-full p-8 rounded-lg border border-gray-700 hover:border-[#4a8bc2] transition-all duration-300 hover:shadow-lg hover:shadow-[#4a8bc2]/20 cursor-pointer bg-gradient-to-br from-gray-900/50 to-gray-800/50">
-              <h3 className="text-2xl font-semibold text-white mb-3 group-hover:text-[#4a8bc2] transition-colors">
-                Leaderboard
-              </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                View performance metrics and rankings of AI-enabled software engineering tools and systems in real-world scenarios.
-              </p>
-            </div>
-          </Link>
+          </div>
         </div>
+
+        {/* Leaderboards Section */}
+        <div className="mb-85">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+            <div className="h-80 bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-lg border border-gray-700 flex items-center justify-center order-2 md:order-1">
+              <p className="text-gray-500">Interactive Plot or Image</p>
+            </div>
+            <div className="order-1 md:order-2">
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-6">
+                Leaderboards
+              </h2>
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8">
+                Comprehensive rankings and performance metrics of AI-enabled software engineering tools and systems. Compare agents across real-world scenarios and benchmarks.
+              </p>
+              <Link href="/leaderboard" className="glass-button-standard">
+                View Leaderboards
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Studies Section */}
+        <div className="mb-85">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-6">
+                Studies
+              </h2>
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8">
+                Explore our latest research studies and empirical findings on trustworthy AI systems and software engineering practices. Discover insights from real-world agent evaluation.
+              </p>
+              <Link href="/studies" className="glass-button-standard">
+                Read Studies
+              </Link>
+            </div>
+            <div className="h-80 bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-lg border border-gray-700 flex items-center justify-center">
+              <p className="text-gray-500">Interactive Plot or Image</p>
+            </div>
+          </div>
+        </div>
+
+        {/* About Us Section */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+            <div className="h-80 bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-lg border border-gray-700 flex items-center justify-center order-2 md:order-1">
+              <p className="text-gray-500">Interactive Plot or Image</p>
+            </div>
+            <div className="order-1 md:order-2">
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-6">
+                About Us
+              </h2>
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8">
+                Learn more about our research lab, our team, and the interdisciplinary approaches we use to advance AI-enabled software engineering. Discover our mission and vision.
+              </p>
+              <Link href="/about" className="glass-button-standard">
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </div>
+
       </section>
 
       {/* Uncomment to show Dashboard
