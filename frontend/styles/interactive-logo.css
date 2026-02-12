@@ -42,7 +42,7 @@
     fill: #5a9fd4;
     stroke: #7aa8d4;
     opacity: 1;
-    filter: drop-shadow(0 0 16px rgba(74, 139, 194, 0.8)) drop-shadow(0 -4px 12px rgba(74, 139, 194, 0.6));
+    filter: drop-shadow(0 0 7px rgba(74, 139, 194, 0.8)) drop-shadow(0 -4px 12px rgba(74, 139, 194, 0.6));
   }
   100% {
     transform: translateY(0) scale(1);
@@ -67,7 +67,7 @@
     fill: #5a9fd4;
     stroke: #7aa8d4;
     opacity: 1;
-    filter: drop-shadow(0 0 16px rgba(74, 139, 194, 0.8)) drop-shadow(0 -4px 12px rgba(74, 139, 194, 0.6));
+    filter: drop-shadow(0 0 7px rgba(74, 139, 194, 0.8)) drop-shadow(0 -4px 12px rgba(74, 139, 194, 0.6));
   }
   100% {
     transform: translateY(-20px) scale(0.8);
