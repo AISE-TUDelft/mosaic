@@ -1,169 +1,10 @@
+from typing import Optional
 
 # Collect initial information about each PR
 # Should scrape from January 1st 2023 until current date.
 # after parameter was initially used for pagination, but no longer needed if you handle pagination internally
 # Similarly, you can remove the filter parameter within the search, it was initially used to get PRs for a certain agent. Now we want to collect ALL PRs, irrespective of the authorship. We'll perform the filtering afterwards.
-def backbone_pr_query(filter:str, start_date:str, end_date:str, first: int, after: Optional[str]) -> str:
-        query = f"""
-            query {{
-                search(type: ISSUE, query:"is:pr {filter} created:{start_date}..{end_date} sort:created-asc", first: {first}, after: {f'"{after}"' if after else 'null'}) {{
-                    issueCount
-                    pageInfo {{
-                        endCursor
-                        hasNextPage
-                    }}
-                    nodes {{
-                        ... on PullRequest {{
-                            id
-                            fullDatabaseId
-                            title
-                            url
-                            number
-                            state
-                            locked
-                            closed
-                            mergeable
-                            merged
-                            body
-                            bodyText
-                            createdAt
-                            mergedAt
-                            closedAt
-                            updatedAt
-                            lastEditedAt
-                            publishedAt
-                            reviewDecision
-                            isDraft
-                            isReadByViewer
-                            isMergeQueueEnabled
-                            isInMergeQueue
-                            mergeStateStatus
-                            isCrossRepository
-                            canbeRebased
-                            changedFiles
-                            additions
-                            deletions
-                            activeLockReason
-                            createdViaEmail
-                            includesCreatedEdit
-                            maintainerCanModify
-                            checksResourcePath
-                            checksUrl
-                            revertUrl
-                            permalink 
-                            resourcePath
-                            revertResourcePath 
-                            authorAssociation
-                            totalCommentsCount
-                            baseRefName
-                            baseRefOid
-                            headRefName
-                            headRefOid
-                            autoMergeRequest {{
-                                authorEmail
-                                commitBody
-                                commitHeadLine
-                                enabledAt
-                                mergeMethod
-                            }}
-                            files(handle_pagination) {{
-                                totalCount
-                                nodes {{
-                                    additions
-                                    deletions
-                                    changeType
-                                    path
-                                }}
-                            }}
-                            labels(handle_pagination) {{
-                                totalCount
-                                nodes {{
-                                    name 
-                                    color
-                                    description
-                                    createdAt
-                                    isDefault
-                                }}
-                            }}
-                            mergedBy {{
-                                id
-                                databaseId
-                                createdAt
-                                avatarUrl
-                                login
-                                resourcePath
-                                url
-                                __typename
-                            }}
-                            milestone {{
-                                id
-                                closed
-                                closedAt
-                                closedIssueCount
-                                createdAt
-                                description
-                                dueOn
-                                number
-                                openIssueCount
-                                state
-                                resourcePath
-                                title
-                                updatedAt
-                                url
-                            }}
-                            participants(handle_pagination) {{
-                                totalCount
-                                nodes {{
-                                    id
-                                    databaseId
-                                    createdAt
-                                    avatarUrl
-                                    login
-                                    resourcePath
-                                    url
-                                    __typename
-                                }}
-                            }}
-                            reactionGroups {{
-                                createdAt
-                                content
-                                subject {{
-                                    databaseId
-                                    id  
-                                }}
-                            }}
-                            reactions(handle_pagination) {{
-                                totalCount
-                                nodes {{
-                                    id
-                                    databaseId
-                                    content
-                                    createdAt
-                                    user {{
-                                        id
-                                        databaseId
-                                        login
-                                        url
-                                        __typename
-                                    }}
-                                }}
-                            }}
-                            timelineItems(handle_pagination) {{
-                                totalCount
-                                filteredCount
-                                updatedAt
-                                nodes {{
-                                    id
-                                    createdAt
-                                    __typename
-                                }}
-                            }}
-                        }}
-                    }}
-                }}            
-            }} 
-        """
-        return query  
+    
     
 
 
@@ -174,24 +15,40 @@ def pr_review_query(self, pr_ids: str) -> str:
                 nodes(ids: [{pr_ids}]) {{
                     ... on PullRequest {{
                         id
-                        fulldatabaseId
-                        reviewRequests(handle_pagination) {{
+                        fullDatabaseId
+                        reviewRequests(first: 100) {{
                             totalCount
                             nodes {{
                                 id
                                 databaseId
                                 asCodeOwner
                                 requestedReviewer {{
-                                    id
-                                    databaseId
-                                    login
-                                    avatarUrl
-                                    url
                                     __typename
+                                    ... on User {{
+                                        id
+                                        databaseId
+                                        login
+                                        avatarUrl
+                                        url
+                                    }}
+                                    ... on Bot {{
+                                        id
+                                        databaseId
+                                        login
+                                        avatarUrl
+                                        url
+                                    }}
+                                    ... on Team {{
+                                        id
+                                        databaseId
+                                        name
+                                        slug
+                                        url
+                                    }}
                                 }}
                             }}
                         }}
-                        reviewThreads(handle_pagination) {{
+                        reviewThreads(first: 100) {{
                             totalCount
                             nodes {{
                                 id
@@ -209,10 +66,7 @@ def pr_review_query(self, pr_ids: str) -> str:
                                     totalCount
                                 }}
                                 resolvedBy {{
-                                        id
-                                        databaseId
                                         login
-                                        name
                                         avatarUrl
                                         url
                                         __typename
@@ -220,409 +74,23 @@ def pr_review_query(self, pr_ids: str) -> str:
                                 subjectType 
                             }}  
                         }}
-                        reviews(handle_pagination) {{
+                        reviews(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
                                     fullDatabaseId
                                     authorAssociation
-                                    authors {{
-                                        id
-                                        databaseId
-                                        createdAt
-                                        avatarUrl
+                                    author {{
                                         login
+                                        avatarUrl
                                         resourcePath
                                         url
                                         __typename
-                                        ... on User {{
-                                            id
-                                            databaseId
-                                            bio
-                                            avatarUrl
-                                            createdAt
-                                            email
-                                            url
-                                            websiteUrl
-                                            userViewType
-                                            estimatedNextSponsorsPayoutInCents
-                                            commitComments {{
-                                                totalCount
-                                            }}
-                                            company
-                                            contributionsCollection {{
-                                                commitContributionsByRepository {{
-                                                    url
-                                                    resourcePath
-                                                    contributions(handle_pagination) {{
-                                                        totalCount
-                                                    }}
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                }}
-                                            contributionCalendar {{
-                                                colors
-                                                isHalloween
-                                                months
-                                                totalContributions
-                                                weeks
-                                            }}
-                                            contributionYears
-                                            doesEndInCurrentMonth
-                                            endedAt
-                                            firstIssueContribution {{
-                                                ... on CreatedIssueContribution {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resorucePath
-                                                    url
-                                                    __typename
-                                                }}
-                                            }}
-                                            firstPullRequestContribution {{
-                                                ... on CreatedPullRequestContribution {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url
-                                                    __typename 
-                                                }}
-                                            }}
-                                            firstRepositoryContribution {{
-                                                ... on CreatedRepositoryContribution {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url 
-                                                    __typename
-                                                }}
-                                            }}
-                                            hasActivityInThePast
-                                            hasAnyContributions
-                                            hasAnyRestrictedContributions
-                                            isSingleDay
-                                            issueContributions {{
-                                                totalCount
-                                            }}
-                                            issueContributionsByRepository {{
-                                                repository {{
-                                                    id
-                                                    databaseId
-                                                    name
-                                                    url
-                                                    sshUrl
-                                                    createdAt
-                                                    description
-                                                    isPrivate
-                                                    forkCount
-                                                    stargazerCount
-                                                    labels(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
-                                                    }}
-                                                    languages(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
-                                                    }}
-                                                    primaryLanguage {{
-                                                        id
-                                                        color
-                                                        name
-                                                    }}
-                                                }}
-                                                contributions(handle_pagination) {{
-                                                    totalCount
-                                                }}
-                                            }}
-                                            pullRequestContributions(handle_pagination) {{
-                                                totalCount
-                                            }}
-                                            pullRequestContributionsByRepository {{
-                                                repository {{
-                                                    id
-                                                    databaseId
-                                                    name
-                                                    url
-                                                    sshUrl
-                                                    createdAt
-                                                    description
-                                                    isPrivate
-                                                    forkCount
-                                                    stargazerCount
-                                                    labels(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
-                                                    }}
-                                                    languages(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
-                                                    }}
-                                                    primaryLanguage {{
-                                                        id
-                                                        color
-                                                        name
-                                                    }}
-                                                }}
-                                                contributions {{
-                                                    totalCount
-                                                }}      
-                                            }}
-                                            pullRequestReviewContributions {{
-                                                totalCount
-                                            }}
-                                            pullRequestReviewContributionsByRepository(handle_pagination) {{
-                                                totalCount
-                                                nodes {{
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                    contributions {{
-                                                        totalCount
-                                                    }}
-                                                }}
-                                            }}
-                                            repositoryContributions(handle_pagination) {{
-                                                totalCount
-                                                nodes {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                }}
-                                            }}
-                                            startedAt
-                                            totalCommitContributions
-                                            totalIssueContributions
-                                            totalPullRequestContributions
-                                            totalPullRequestReviewContributions
-                                            totalRepositoriesWithContributedCommits
-                                            totalRepositoriesWithContributedIssues
-                                            totalRepositoriesWithContributedPullRequestReviews
-                                            totalRepositoriesWithContributedPullRequests
-                                            totalRepositoryContributions
-                                        }}
-                                        enterprises {{
-                                            totalCount
-                                        }}
-                                        followers {{
-                                            totalCount
-                                        }}
-                                        following {{
-                                            totalCount
-                                        }}
-                                        gistComments(handle_pagination) {{
-                                            totalCount
-                                        }}
-                                        gists {{
-                                            totalCount
-                                        }}
-                                        hasSponsorsListing
-                                        isBountyHunter
-                                        isCampusExpert
-                                        isDeveloperProgramMember
-                                        isEmployee
-                                        isGitHubStar
-                                        isHireable
-                                        isSiteAdmin
-                                        isSponsoredBy
-                                        issueComments {{
-                                            totalCount
-                                        }}
-                                        issues{{
-                                            totalCount
-                                        }}
-                                        lifetimeReceivedSponsorshipValues {{
-                                            totalCount
-                                        }}
-                                        lists {{
-                                            totalCount
-                                        }}
-                                        location
-                                        login
-                                        monthlyEstimatedSponsorsIncomeInCents
-                                        name
-                                        organizations{{
-                                            totalCount
-                                        }}
-                                        packages {{
-                                            totalCount
-                                        }}
-                                        projectsResourcePath
-                                        projectsUrl
-                                        pronouns
-                                        pullRequests {{
-                                            totalCount
-                                        }}
-                                        repositories {{
-                                            totalCount
-                                        }}
-                                        repositoriesContributedTo {{
-                                            totalCount
-                                        }}
-                                        repositoryDiscussionComments {{
-                                            totalCount
-                                        }}
-                                        repositoryDiscussions{{
-                                            totalCount
-                                        }}
-                                        socialAccounts {{
-                                            totalCount
-                                        }}
-                                        sponsoring {{
-                                            totalCount
-                                        }}
-                                        sponsors {{
-                                            totalCount
-                                        }}
-                                        starredRepositories {{
-                                            totalCount
-                                            isOverLimit
-                                        }}
-                                        status {{
-                                            id
-                                            createdAt
-                                            emoji
-                                            expiresAt
-                                            indicatesLimitedAvailability
-                                            message
-                                            updatedAt
-                                        }}
-                                        topRepositories(handle_pagination) {{
-                                            totalCount
-                                        }}
-                                        totalSponsorshipAmountAsSponsorInCents
-                                        twitterUsername
-                                        updatedAt  
-                                        __typename
-                                        }} 
                                     }}
                                     body
                                     bodyText
                                     createdAt
                                     editor {{
-                                        id
-                                        databaseId
-                                        createdAt
                                         avatarUrl
                                         login
                                         resourcePath
@@ -642,18 +110,14 @@ def pr_review_query(self, pr_ids: str) -> str:
                                             databaseId
                                             id  
                                         }}
-                                        reactors(handle_pagination) {{
+                                        reactors(first: 100) {{
                                             totalCount
                                             nodes {{
-                                                id
-                                                databaseId
-                                                login
-                                                url
                                                 __typename  
                                             }}
                                         }}
                                     }}
-                                    reactions(handle_pagination) {{
+                                    reactions(first: 100) {{
                                         totalCount
                                         nodes {{
                                             id
@@ -670,7 +134,7 @@ def pr_review_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                 }}
-                                comments(handle_pagination) {{
+                                comments(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -705,23 +169,11 @@ def pr_review_query(self, pr_ids: str) -> str:
                                     isPrivate
                                     forkCount
                                     stargazerCount
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
-                                    languages(handle_pagination) {{
+                                    languages {{
                                         totalCount
-                                        nodes {{
-                                            color
-                                            id
-                                            name
-                                        }}
                                     }}
                                     primaryLanguage {{
                                         id
@@ -750,17 +202,17 @@ def pr_commit_query(self, pr_ids: str) -> str:
                 nodes(ids: [{pr_ids}]) {{
                     ... on PullRequest {{
                         id
-                        fulldatabaseId
+                        fullDatabaseId
                         mergeCommit {{
                             id
                             oid
                             url
                             message
                             messageBody
-                            messageHeadLine
+                            messageHeadline
                             abbreviatedOid
                             additions
-                            associatedPullRequests(handle_pagination) {{
+                            associatedPullRequests(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -788,7 +240,7 @@ def pr_commit_query(self, pr_ids: str) -> str:
                                     isInMergeQueue
                                     mergeStateStatus
                                     isCrossRepository
-                                    canbeRebased
+                                    canBeRebased
                                     changedFiles
                                     additions
                                     deletions
@@ -805,27 +257,33 @@ def pr_commit_query(self, pr_ids: str) -> str:
                             committedDate
                             deletions
                             author {{
-                                id
-                                databaseId
-                                createdAt
-                                avatarUrl
-                                login
-                                resourcePath
-                                url
-                                __typename
+                                name
+                                email
+                                date
+                                user {{
+                                    id
+                                    databaseId
+                                    login
+                                    avatarUrl
+                                    url
+                                    __typename
+                                }}
                             }}
                             committer {{
-                                id
-                                databaseId
-                                createdAt
-                                avatarUrl
-                                login
-                                resourcePath
-                                url
-                                __typename
+                                name
+                                email
+                                date
+                                user {{
+                                    id
+                                    databaseId
+                                    login
+                                    avatarUrl
+                                    url
+                                    __typename
+                                }}
                             }}
                         }}
-                        commits(handle_pagination) {{
+                        commits(first: 100) {{
                             totalCount
                             nodes {{
                                 id
@@ -841,7 +299,7 @@ def pr_commit_query(self, pr_ids: str) -> str:
                                     messageHeadline
                                     abbreviatedOid
                                     additions
-                                    associatedPullRequests(handle_pagination) {{
+                                    associatedPullRequests(first: 100) {{
                                         totalCount
                                         nodes {{
                                             id
@@ -849,454 +307,54 @@ def pr_commit_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                     author {{
-                                        id
-                                        databaseId
-                                        createdAt
-                                        avatarUrl
                                         email
                                         name
-                                        login
-                                        __typename 
+                                        date
+                                        user {{
+                                            id
+                                            databaseId
+                                            login
+                                            avatarUrl
+                                            url
+                                            __typename
+                                        }}
                                     }}
                                     authoredByCommitter
                                     authoredDate
                                     changedFilesIfAvailable
-                                    authors(handle_pagination) {{
+                                    authors(first: 100) {{
                                         totalCount
                                         nodes {{
-                                            avatarUrl
                                             email
                                             name
-                                            login
-                                            createdAt
-                                            __typename
+                                            date
                                             user {{
                                                 id
                                                 databaseId
-                                                bio
+                                                login
                                                 avatarUrl
-                                                createdAt
-                                                email
                                                 url
-                                                websiteUrl
-                                                userViewType
-                                                estimatedNextSponsorsPayoutInCents
-                                                commitComments {{
-                                                    totalCount
-                                                }}
-                                                company
-                                                contributionsCollection {{
-                                                    commitContributionsByRepository {{
-                                                        url
-                                                        resourcePath
-                                                        contributions(handle_pagination) {{
-                                                            totalCount
-                                                        }}
-                                                        repository {{
-                                                            id
-                                                            databaseId
-                                                            name
-                                                            url
-                                                            sshUrl
-                                                            createdAt
-                                                            description
-                                                            isPrivate
-                                                            forkCount
-                                                            stargazerCount
-                                                            labels(handle_pagination) {{
-                                                                totalCount
-                                                                nodes {{
-                                                                    name 
-                                                                    color
-                                                                    description
-                                                                    createdAt
-                                                                    isDefault
-                                                                }}
-                                                            }}
-                                                            languages(handle_pagination) {{
-                                                                totalCount
-                                                                nodes {{
-                                                                    color
-                                                                    id
-                                                                    name
-                                                                }}
-                                                            }}
-                                                            primaryLanguage {{
-                                                                id
-                                                                color
-                                                                name
-                                                            }}
-                                                        }}
-                                                    }}
-                                                contributionCalendar {{
-                                                    colors
-                                                    isHalloween
-                                                    months
-                                                    totalContributions
-                                                    weeks
-                                                }}
-                                                contributionYears
-                                                doesEndInCurrentMonth
-                                                endedAt
-                                                firstIssueContribution {{
-                                                    ... on CreatedIssueContribution {{
-                                                        isRestricted
-                                                        occurredAt
-                                                        resorucePath
-                                                        url
-                                                        __typename
-                                                    }}
-                                                }}
-                                                firstPullRequestContribution {{
-                                                    ... on CreatedPullRequestContribution {{
-                                                        isRestricted
-                                                        occurredAt
-                                                        resourcePath
-                                                        url
-                                                        __typename 
-                                                    }}
-                                                }}
-                                                firstRepositoryContribution {{
-                                                    ... on CreatedRepositoryContribution {{
-                                                        isRestricted
-                                                        occurredAt
-                                                        resourcePath
-                                                        url 
-                                                        __typename
-                                                    }}
-                                                }}
-                                                hasActivityInThePast
-                                                hasAnyContributions
-                                                hasAnyRestrictedContributions
-                                                isSingleDay
-                                                issueContributions {{
-                                                    totalCount
-                                                }}
-                                                issueContributionsByRepository {{
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                    contributions(handle_pagination) {{
-                                                        totalCount
-                                                    }}
-                                                }}
-                                                pullRequestContributions(handle_pagination) {{
-                                                    totalCount
-                                                }}
-                                                pullRequestContributionsByRepository {{
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                    contributions {{
-                                                        totalCount
-                                                    }}      
-                                                }}
-                                                pullRequestReviewContributions {{
-                                                    totalCount
-                                                }}
-                                                pullRequestReviewContributionsByRepository(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        repository {{
-                                                            id
-                                                            databaseId
-                                                            name
-                                                            url
-                                                            sshUrl
-                                                            createdAt
-                                                            description
-                                                            isPrivate
-                                                            forkCount
-                                                            stargazerCount
-                                                            labels(handle_pagination) {{
-                                                                totalCount
-                                                                nodes {{
-                                                                    name 
-                                                                    color
-                                                                    description
-                                                                    createdAt
-                                                                    isDefault
-                                                                }}
-                                                            }}
-                                                            languages(handle_pagination) {{
-                                                                totalCount
-                                                                nodes {{
-                                                                    color
-                                                                    id
-                                                                    name
-                                                                }}
-                                                            }}
-                                                            primaryLanguage {{
-                                                                id
-                                                                color
-                                                                name
-                                                            }}
-                                                        }}
-                                                        contributions {{
-                                                            totalCount
-                                                        }}
-                                                    }}
-                                                }}
-                                                repositoryContributions(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        isRestricted
-                                                        occurredAt
-                                                        resourcePath
-                                                        url
-                                                        repository {{
-                                                            id
-                                                            databaseId
-                                                            name
-                                                            url
-                                                            sshUrl
-                                                            createdAt
-                                                            description
-                                                            isPrivate
-                                                            forkCount
-                                                            stargazerCount
-                                                            labels(handle_pagination) {{
-                                                                totalCount
-                                                                nodes {{
-                                                                    name 
-                                                                    color
-                                                                    description
-                                                                    createdAt
-                                                                    isDefault
-                                                                }}
-                                                            }}
-                                                            languages(handle_pagination) {{
-                                                                totalCount
-                                                                nodes {{
-                                                                    color
-                                                                    id
-                                                                    name
-                                                                }}
-                                                            }}
-                                                            primaryLanguage {{
-                                                                id
-                                                                color
-                                                                name
-                                                            }}
-                                                        }}
-                                                    }}
-                                                }}
-                                                startedAt
-                                                totalCommitContributions
-                                                totalIssueContributions
-                                                totalPullRequestContributions
-                                                totalPullRequestReviewContributions
-                                                totalRepositoriesWithContributedCommits
-                                                totalRepositoriesWithContributedIssues
-                                                totalRepositoriesWithContributedPullRequestReviews
-                                                totalRepositoriesWithContributedPullRequests
-                                                totalRepositoryContributions
+                                                __typename
                                             }}
-                                            enterprises {{
-                                                totalCount
-                                            }}
-                                            followers {{
-                                                totalCount
-                                            }}
-                                            following {{
-                                                totalCount
-                                            }}
-                                            gistComments(handle_pagination) {{
-                                                totalCount
-                                            }}
-                                            gists {{
-                                                totalCount
-                                            }}
-                                            hasSponsorsListing
-                                            isBountyHunter
-                                            isCampusExpert
-                                            isDeveloperProgramMember
-                                            isEmployee
-                                            isGitHubStar
-                                            isHireable
-                                            isSiteAdmin
-                                            isSponsoredBy
-                                            issueComments {{
-                                                totalCount
-                                            }}
-                                            issues{{
-                                                totalCount
-                                            }}
-                                            lifetimeReceivedSponsorshipValues {{
-                                                totalCount
-                                            }}
-                                            lists {{
-                                                totalCount
-                                            }}
-                                            location
-                                            login
-                                            monthlyEstimatedSponsorsIncomeInCents
-                                            name
-                                            organizations{{
-                                                totalCount
-                                            }}
-                                            packages {{
-                                                totalCount
-                                            }}
-                                            projectsResourcePath
-                                            projectsUrl
-                                            pronouns
-                                            pullRequests {{
-                                                totalCount
-                                            }}
-                                            repositories {{
-                                                totalCount
-                                            }}
-                                            repositoriesContributedTo {{
-                                                totalCount
-                                            }}
-                                            repositoryDiscussionComments {{
-                                                totalCount
-                                            }}
-                                            repositoryDiscussions{{
-                                                totalCount
-                                            }}
-                                            socialAccounts {{
-                                                totalCount
-                                            }}
-                                            sponsoring {{
-                                                totalCount
-                                            }}
-                                            sponsors {{
-                                                totalCount
-                                            }}
-                                            starredRepositories {{
-                                                totalCount
-                                                isOverLimit
-                                            }}
-                                            status {{
-                                                id
-                                                createdAt
-                                                emoji
-                                                expiresAt
-                                                indicatesLimitedAvailability
-                                                message
-                                                updatedAt
-                                            }}
-                                            topRepositories(handle_pagination) {{
-                                                totalCount
-                                            }}
-                                            totalSponsorshipAmountAsSponsorInCents
-                                            twitterUsername
-                                            updatedAt  
-                                            __typename
-                                            }} 
                                         }} 
-                                    }}
-                                    blame {{
-                                        ranges {{
-                                            startingLine
-                                            endingLine 
-                                            age
-                                        }}
                                     }}
                                     commitResourcePath
                                     commitUrl
                                     committedDate
                                     committer {{
-                                        id
-                                        databaseId
-                                        avatarUrl
                                         email
                                         name
-                                        login
-                                        createdAt
-                                        __typename 
+                                        date
+                                        user {{
+                                            id
+                                            databaseId
+                                            login
+                                            avatarUrl
+                                            url
+                                            __typename
+                                        }}
                                     }}
                                     deletions
-                                    file {{
-                                        oid
-                                        language
-                                        extension
-                                        lineCount
-                                        name 
-                                        path
-                                        size 
-                                        type
-                                        history(handle_pagination) {{
-                                            totalCount
-                                            nodes {{
-                                                abbreviatedOid
-                                                id
-                                                oid
-                                                message
-                                                messageBody
-                                                messageHeadline
-                                                url
-                                            }}
-                                        }}
-                                        resourcePath
-                                        treeUrl    
-                                    }} 
                                 }}
                             }}
                         }}
@@ -1318,399 +376,20 @@ def pr_comment_query(self, pr_ids: str) -> str:
                 nodes(ids: [{pr_ids}]) {{
                     ... on PullRequest {{
                         id
-                        fulldatabaseId
-                        comments(handle_pagination) {{
+                        fullDatabaseId
+                        comments(first: 100) {{
                             totalCount
                             nodes {{
                                 id
                                 databaseId
                                 author {{
-                                    id
-                                    databaseId
                                     __typename
                                     login
                                     url
                                     avatarUrl
-                                    name
                                     ... on User {{
-                                            id
-                                            databaseId
-                                            bio
-                                            avatarUrl
-                                            createdAt
-                                            email
-                                            url
-                                            websiteUrl
-                                            userViewType
-                                            estimatedNextSponsorsPayoutInCents
-                                            commitComments {{
-                                                totalCount
-                                            }}
-                                            company
-                                            contributionsCollection {{
-                                                commitContributionsByRepository {{
-                                                    url
-                                                    resourcePath
-                                                    contributions(handle_pagination) {{
-                                                        totalCount
-                                                    }}
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                }}
-                                            contributionCalendar {{
-                                                colors
-                                                isHalloween
-                                                months
-                                                totalContributions
-                                                weeks
-                                            }}
-                                            contributionYears
-                                            doesEndInCurrentMonth
-                                            endedAt
-                                            firstIssueContribution {{
-                                                ... on CreatedIssueContribution {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resorucePath
-                                                    url
-                                                    __typename
-                                                }}
-                                            }}
-                                            firstPullRequestContribution {{
-                                                ... on CreatedPullRequestContribution {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url
-                                                    __typename 
-                                                }}
-                                            }}
-                                            firstRepositoryContribution {{
-                                                ... on CreatedRepositoryContribution {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url 
-                                                    __typename
-                                                }}
-                                            }}
-                                            hasActivityInThePast
-                                            hasAnyContributions
-                                            hasAnyRestrictedContributions
-                                            isSingleDay
-                                            issueContributions {{
-                                                totalCount
-                                            }}
-                                            issueContributionsByRepository {{
-                                                repository {{
-                                                    id
-                                                    databaseId
-                                                    name
-                                                    url
-                                                    sshUrl
-                                                    createdAt
-                                                    description
-                                                    isPrivate
-                                                    forkCount
-                                                    stargazerCount
-                                                    labels(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
-                                                    }}
-                                                    languages(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
-                                                    }}
-                                                    primaryLanguage {{
-                                                        id
-                                                        color
-                                                        name
-                                                    }}
-                                                }}
-                                                contributions(handle_pagination) {{
-                                                    totalCount
-                                                }}
-                                            }}
-                                            pullRequestContributions(handle_pagination) {{
-                                                totalCount
-                                            }}
-                                            pullRequestContributionsByRepository {{
-                                                repository {{
-                                                    id
-                                                    databaseId
-                                                    name
-                                                    url
-                                                    sshUrl
-                                                    createdAt
-                                                    description
-                                                    isPrivate
-                                                    forkCount
-                                                    stargazerCount
-                                                    labels(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
-                                                    }}
-                                                    languages(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
-                                                    }}
-                                                    primaryLanguage {{
-                                                        id
-                                                        color
-                                                        name
-                                                    }}
-                                                }}
-                                                contributions {{
-                                                    totalCount
-                                                }}      
-                                            }}
-                                            pullRequestReviewContributions {{
-                                                totalCount
-                                            }}
-                                            pullRequestReviewContributionsByRepository(handle_pagination) {{
-                                                totalCount
-                                                nodes {{
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                    contributions {{
-                                                        totalCount
-                                                    }}
-                                                }}
-                                            }}
-                                            repositoryContributions(handle_pagination) {{
-                                                totalCount
-                                                nodes {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                }}
-                                            }}
-                                            startedAt
-                                            totalCommitContributions
-                                            totalIssueContributions
-                                            totalPullRequestContributions
-                                            totalPullRequestReviewContributions
-                                            totalRepositoriesWithContributedCommits
-                                            totalRepositoriesWithContributedIssues
-                                            totalRepositoriesWithContributedPullRequestReviews
-                                            totalRepositoriesWithContributedPullRequests
-                                            totalRepositoryContributions
-                                        }}
-                                        enterprises {{
-                                            totalCount
-                                        }}
-                                        followers {{
-                                            totalCount
-                                        }}
-                                        following {{
-                                            totalCount
-                                        }}
-                                        gistComments(handle_pagination) {{
-                                            totalCount
-                                        }}
-                                        gists {{
-                                            totalCount
-                                        }}
-                                        hasSponsorsListing
-                                        isBountyHunter
-                                        isCampusExpert
-                                        isDeveloperProgramMember
-                                        isEmployee
-                                        isGitHubStar
-                                        isHireable
-                                        isSiteAdmin
-                                        isSponsoredBy
-                                        issueComments {{
-                                            totalCount
-                                        }}
-                                        issues{{
-                                            totalCount
-                                        }}
-                                        lifetimeReceivedSponsorshipValues {{
-                                            totalCount
-                                        }}
-                                        lists {{
-                                            totalCount
-                                        }}
-                                        location
-                                        login
-                                        monthlyEstimatedSponsorsIncomeInCents
-                                        name
-                                        organizations{{
-                                            totalCount
-                                        }}
-                                        packages {{
-                                            totalCount
-                                        }}
-                                        projectsResourcePath
-                                        projectsUrl
-                                        pronouns
-                                        pullRequests {{
-                                            totalCount
-                                        }}
-                                        repositories {{
-                                            totalCount
-                                        }}
-                                        repositoriesContributedTo {{
-                                            totalCount
-                                        }}
-                                        repositoryDiscussionComments {{
-                                            totalCount
-                                        }}
-                                        repositoryDiscussions{{
-                                            totalCount
-                                        }}
-                                        socialAccounts {{
-                                            totalCount
-                                        }}
-                                        sponsoring {{
-                                            totalCount
-                                        }}
-                                        sponsors {{
-                                            totalCount
-                                        }}
-                                        starredRepositories {{
-                                            totalCount
-                                            isOverLimit
-                                        }}
-                                        status {{
-                                            id
-                                            createdAt
-                                            emoji
-                                            expiresAt
-                                            indicatesLimitedAvailability
-                                            message
-                                            updatedAt
-                                        }}
-                                        topRepositories(handle_pagination) {{
-                                            totalCount
-                                        }}
-                                        totalSponsorshipAmountAsSponsorInCents
-                                        twitterUsername
-                                        updatedAt  
-                                        __typename
+                                        id
+                                        databaseId
                                     }}
                                 }}
                                 authorAssociation
@@ -1731,20 +410,13 @@ def pr_comment_query(self, pr_ids: str) -> str:
                                     createdAt
                                     closed
                                     closedAt
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
                                 }}
                                 minimizedReason
                                 publishedAt
-                                reactions(handle_pagination) {{
+                                reactions(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -1779,8 +451,8 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                 nodes(ids: [{pr_ids}]) {{
                     ... on PullRequest {{
                         id
-                        fulldatabaseId
-                        closingIssuesReferences(handle_pagination) {{
+                        fullDatabaseId
+                        closingIssuesReferences(first: 100) {{
                             totalCount
                             nodes {{
                                 id
@@ -1794,22 +466,46 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                 bodyUrl
                                 number
                                 activeLockReason
-                                assignedActors(handle_pagination) {{
-                                    id
-                                    databaseId
-                                    createdAt
-                                    avatarUrl
-                                    login
-                                    name
-                                    __typename 
+                                assignedActors(first: 100) {{
+                                    totalCount
+                                    nodes {{
+                                        __typename
+                                        ... on User {{
+                                            id
+                                            databaseId
+                                            login
+                                            name
+                                            avatarUrl
+                                            url
+                                        }}
+                                        ... on Bot {{
+                                            id
+                                            databaseId
+                                            login
+                                            avatarUrl
+                                            url
+                                        }}
+                                        ... on Organization {{
+                                            id
+                                            databaseId
+                                            login
+                                            name
+                                            avatarUrl
+                                            url
+                                        }}
+                                        ... on Mannequin {{
+                                            id
+                                            databaseId
+                                            login
+                                            name
+                                            avatarUrl
+                                            url
+                                        }}
+                                    }}
                                 }}
                                 author {{
-                                    id
-                                    databaseId
-                                    createdAt
                                     avatarUrl
                                     login
-                                    name
                                     __typename
                                     ... on User {{
                                             id
@@ -1830,7 +526,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                                 commitContributionsByRepository {{
                                                     url
                                                     resourcePath
-                                                    contributions(handle_pagination) {{
+                                                    contributions {{
                                                         totalCount
                                                     }}
                                                     repository {{
@@ -1844,23 +540,11 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                                         isPrivate
                                                         forkCount
                                                         stargazerCount
-                                                        labels(handle_pagination) {{
+                                                        labels {{
                                                             totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
                                                         }}
-                                                        languages(handle_pagination) {{
+                                                        languages {{
                                                             totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
                                                         }}
                                                         primaryLanguage {{
                                                             id
@@ -1872,9 +556,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                             contributionCalendar {{
                                                 colors
                                                 isHalloween
-                                                months
                                                 totalContributions
-                                                weeks
                                             }}
                                             contributionYears
                                             doesEndInCurrentMonth
@@ -1883,7 +565,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                                 ... on CreatedIssueContribution {{
                                                     isRestricted
                                                     occurredAt
-                                                    resorucePath
+                                                    resourcePath
                                                     url
                                                     __typename
                                                 }}
@@ -1925,23 +607,11 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                                     isPrivate
                                                     forkCount
                                                     stargazerCount
-                                                    labels(handle_pagination) {{
+                                                    labels {{
                                                         totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
                                                     }}
-                                                    languages(handle_pagination) {{
+                                                    languages {{
                                                         totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
                                                     }}
                                                     primaryLanguage {{
                                                         id
@@ -1949,11 +619,11 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                                         name
                                                     }}
                                                 }}
-                                                contributions(handle_pagination) {{
+                                                contributions {{
                                                     totalCount
                                                 }}
                                             }}
-                                            pullRequestContributions(handle_pagination) {{
+                                            pullRequestContributions {{
                                                 totalCount
                                             }}
                                             pullRequestContributionsByRepository {{
@@ -1968,23 +638,11 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                                     isPrivate
                                                     forkCount
                                                     stargazerCount
-                                                    labels(handle_pagination) {{
+                                                    labels {{
                                                         totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
                                                     }}
-                                                    languages(handle_pagination) {{
+                                                    languages {{
                                                         totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
                                                     }}
                                                     primaryLanguage {{
                                                         id
@@ -1999,92 +657,8 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                             pullRequestReviewContributions {{
                                                 totalCount
                                             }}
-                                            pullRequestReviewContributionsByRepository(handle_pagination) {{
+                                            repositoryContributions {{
                                                 totalCount
-                                                nodes {{
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                    contributions {{
-                                                        totalCount
-                                                    }}
-                                                }}
-                                            }}
-                                            repositoryContributions(handle_pagination) {{
-                                                totalCount
-                                                nodes {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                }}
                                             }}
                                             startedAt
                                             totalCommitContributions
@@ -2097,16 +671,13 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                             totalRepositoriesWithContributedPullRequests
                                             totalRepositoryContributions
                                         }}
-                                        enterprises {{
-                                            totalCount
-                                        }}
                                         followers {{
                                             totalCount
                                         }}
                                         following {{
                                             totalCount
                                         }}
-                                        gistComments(handle_pagination) {{
+                                        gistComments(first: 100) {{
                                             totalCount
                                         }}
                                         gists {{
@@ -2120,7 +691,6 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         isGitHubStar
                                         isHireable
                                         isSiteAdmin
-                                        isSponsoredBy
                                         issueComments {{
                                             totalCount
                                         }}
@@ -2183,7 +753,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                             message
                                             updatedAt
                                         }}
-                                        topRepositories(handle_pagination) {{
+                                        topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                             totalCount
                                         }}
                                         totalSponsorshipAmountAsSponsorInCents
@@ -2193,7 +763,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     }} 
                                 }}
                                 authorAssociation
-                                blockedBy(handle_pagination) {{
+                                blockedBy(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2203,21 +773,14 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         url
                                         body
                                         bodyText
-                                         labels(handle_pagination) {{
-                                            totalCount
-                                            nodes {{
-                                                name 
-                                                color
-                                                description
-                                                createdAt
-                                                isDefault
-                                            }}
-                                        }}
+                                         labels {{
+                                             totalCount
+                                         }}
                                         closed
                                         closedAt
                                     }}
                                 }}
-                                blocking(handle_pagination) {{
+                                blocking(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2227,33 +790,19 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         url
                                         body
                                         bodyText
-                                         labels(handle_pagination) {{
-                                            totalCount
-                                            nodes {{
-                                                name 
-                                                color
-                                                description
-                                                createdAt
-                                                isDefault
-                                            }}
-                                        }}
+                                         labels {{
+                                             totalCount
+                                         }}
                                         closed
                                         closedAt
                                     }}
                                 }}
-                                labels(handle_pagination) {{
+                                labels {{
                                     totalCount
-                                    nodes {{
-                                        name 
-                                        color
-                                        description
-                                        createdAt
-                                        isDefault
-                                    }}
                                 }}
                                 closed
                                 closedAt
-                                closedByPullRequestsReferences(handle_pagination) {{
+                                closedByPullRequestsReferences(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2281,7 +830,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         isInMergeQueue
                                         mergeStateStatus
                                         isCrossRepository
-                                        canbeRebased
+                                        canBeRebased
                                         changedFiles
                                         additions
                                         deletions
@@ -2302,7 +851,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         headRefOid
                                     }}
                                 }}
-                                comments(handle_pagination) {{
+                                comments(first: 100) {{
                                     totalCount
                                 }}
                                 duplicateOf {{
@@ -2317,12 +866,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     bodyUrl
                                 }}
                                 editor {{
-                                    id
-                                    databaseId
-                                    createdAt
                                     avatarUrl
-                                    email
-                                    name
                                     login
                                     __typename 
                                 }}
@@ -2334,11 +878,10 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     blocking
                                     blockedBy
                                 }}
-                                issueFieldValues(handle_pagination) {{
+                                issueFieldValues(first: 100) {{
                                     totalCount
                                     nodes {{
-                                        id
-                                        value
+                                        __typename
                                     }}
                                 }}
                                 issueType {{
@@ -2349,7 +892,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     name
                                 }}
                                 locked
-                                linkedBranches(handle_pagination) {{
+                                linkedBranches(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2383,21 +926,14 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     url
                                     body
                                     bodyText
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
                                     createdAt
                                     closed
                                     closedAt 
                                 }}
-                                participants(handle_pagination) {{
+                                participants(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2411,7 +947,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     }}
                                 }}
                                 publishedAt
-                                reactions(handle_pagination) {{
+                                reactions(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2430,7 +966,7 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                 resourcePath
                                 state
                                 stateReason
-                                subIssues(handle_pagination) {{
+                                subIssues(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2443,15 +979,8 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         createdAt
                                         closed
                                         closedAt
-                                        labels(handle_pagination) {{
+                                        labels {{
                                             totalCount
-                                            nodes {{
-                                                name 
-                                                color
-                                                description
-                                                createdAt
-                                                isDefault
-                                            }}
                                         }}
                                     }}
                                 }}
@@ -2460,17 +989,13 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                     percentCompleted
                                     total
                                 }}
-                                timelineItems(handle_pagination) {{
+                                timelineItems(first: 100) {{
                                     totalCount
                                     filteredCount
                                     updatedAt
-                                    nodes {{
-                                        id
-                                        createdAt
-                                        __typename
-                                    }}
+                                    nodes {{                                         __typename                                     }}
                                 }}
-                                trackedInIssues(handle_pagination) {{
+                                trackedInIssues(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2483,19 +1008,12 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         createdAt
                                         closed
                                         closedAt
-                                        labels(handle_pagination) {{
+                                        labels {{
                                             totalCount
-                                            nodes {{
-                                                name 
-                                                color
-                                                description
-                                                createdAt
-                                                isDefault
-                                            }}
                                         }}
                                     }}
                                 }}
-                                trackedIssues(handle_pagination) {{
+                                trackedIssues(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -2508,27 +1026,25 @@ def pr_closing_issue_query(self, pr_ids: str) -> str:
                                         createdAt
                                         closed
                                         closedAt
-                                        labels(handle_pagination) {{
+                                        labels {{
                                             totalCount
-                                            nodes {{
-                                                name 
-                                                color
-                                                description
-                                                createdAt
-                                                isDefault
-                                            }}
                                         }}
                                     }}
                                 }}
                                 trackedIssuesCount
                                 updatedAt
-                                userContentEdits(handle_pagination) {{
+                                userContentEdits(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
                                         createdAt
                                         deletedAt
-                                        deletedBy
+                                        deletedBy {{
+                                            avatarUrl
+                                            login
+                                            url
+                                            __typename
+                                        }}
                                         updatedAt
                                         diff
                                     }}
@@ -2550,7 +1066,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                 nodes(ids: [{pr_ids}]) {{
                     ... on PullRequest {{
                         id
-                        fulldatabaseId
+                        fullDatabaseId
                         baseRepository {{
                             id
                             databaseId
@@ -2560,7 +1076,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             autoMergeAllowed
                             visibility
                             forkCount
-                            collaborators(handle_pagination) {{
+                            collaborators(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -2581,7 +1097,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                         commitContributionsByRepository {{
                                             url
                                             resourcePath
-                                            contributions(handle_pagination) {{
+                                            contributions {{
                                                 totalCount
                                             }}
                                             repository {{
@@ -2595,23 +1111,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                                 isPrivate
                                                 forkCount
                                                 stargazerCount
-                                                labels(handle_pagination) {{
+                                                labels {{
                                                     totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
                                                 }}
-                                                languages(handle_pagination) {{
+                                                languages {{
                                                     totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
                                                 }}
                                                 primaryLanguage {{
                                                     id
@@ -2623,9 +1127,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     contributionCalendar {{
                                         colors
                                         isHalloween
-                                        months
                                         totalContributions
-                                        weeks
                                     }}
                                     contributionYears
                                     doesEndInCurrentMonth
@@ -2634,7 +1136,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                         ... on CreatedIssueContribution {{
                                             isRestricted
                                             occurredAt
-                                            resorucePath
+                                            resourcePath
                                             url
                                             __typename
                                         }}
@@ -2676,23 +1178,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                             isPrivate
                                             forkCount
                                             stargazerCount
-                                            labels(handle_pagination) {{
+                                            labels {{
                                                 totalCount
-                                                nodes {{
-                                                    name 
-                                                    color
-                                                    description
-                                                    createdAt
-                                                    isDefault
-                                                }}
                                             }}
-                                            languages(handle_pagination) {{
+                                            languages {{
                                                 totalCount
-                                                nodes {{
-                                                    color
-                                                    id
-                                                    name
-                                                }}
                                             }}
                                             primaryLanguage {{
                                                 id
@@ -2700,11 +1190,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                                 name
                                             }}
                                         }}
-                                        contributions(handle_pagination) {{
+                                        contributions {{
                                             totalCount
                                         }}
                                     }}
-                                    pullRequestContributions(handle_pagination) {{
+                                    pullRequestContributions {{
                                         totalCount
                                     }}
                                     pullRequestContributionsByRepository {{
@@ -2719,23 +1209,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                             isPrivate
                                             forkCount
                                             stargazerCount
-                                            labels(handle_pagination) {{
+                                            labels {{
                                                 totalCount
-                                                nodes {{
-                                                    name 
-                                                    color
-                                                    description
-                                                    createdAt
-                                                    isDefault
-                                                }}
                                             }}
-                                            languages(handle_pagination) {{
+                                            languages {{
                                                 totalCount
-                                                nodes {{
-                                                    color
-                                                    id
-                                                    name
-                                                }}
                                             }}
                                             primaryLanguage {{
                                                 id
@@ -2750,92 +1228,8 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     pullRequestReviewContributions {{
                                         totalCount
                                     }}
-                                    pullRequestReviewContributionsByRepository(handle_pagination) {{
+                                    repositoryContributions {{
                                         totalCount
-                                        nodes {{
-                                            repository {{
-                                                id
-                                                databaseId
-                                                name
-                                                url
-                                                sshUrl
-                                                createdAt
-                                                description
-                                                isPrivate
-                                                forkCount
-                                                stargazerCount
-                                                labels(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
-                                                }}
-                                                languages(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
-                                                }}
-                                                primaryLanguage {{
-                                                    id
-                                                    color
-                                                    name
-                                                }}
-                                            }}
-                                            contributions {{
-                                                totalCount
-                                            }}
-                                        }}
-                                    }}
-                                    repositoryContributions(handle_pagination) {{
-                                        totalCount
-                                        nodes {{
-                                            isRestricted
-                                            occurredAt
-                                            resourcePath
-                                            url
-                                            repository {{
-                                                id
-                                                databaseId
-                                                name
-                                                url
-                                                sshUrl
-                                                createdAt
-                                                description
-                                                isPrivate
-                                                forkCount
-                                                stargazerCount
-                                                labels(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
-                                                }}
-                                                languages(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
-                                                }}
-                                                primaryLanguage {{
-                                                    id
-                                                    color
-                                                    name
-                                                }}
-                                            }}
-                                        }}
                                     }}
                                     startedAt
                                     totalCommitContributions
@@ -2848,16 +1242,13 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     totalRepositoriesWithContributedPullRequests
                                     totalRepositoryContributions
                                     }}
-                                    enterprises {{
-                                        totalCount
-                                    }}
                                     followers {{
                                         totalCount
                                     }}
                                     following {{
                                         totalCount
                                     }}
-                                    gistComments(handle_pagination) {{
+                                    gistComments(first: 100) {{
                                         totalCount
                                     }}
                                     gists {{
@@ -2871,7 +1262,6 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     isGitHubStar
                                     isHireable
                                     isSiteAdmin
-                                    isSponsoredBy
                                     issueComments {{
                                         totalCount
                                     }}
@@ -2934,7 +1324,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                         message
                                         updatedAt
                                     }}
-                                    topRepositories(handle_pagination) {{
+                                    topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                         totalCount
                                     }}
                                     totalSponsorshipAmountAsSponsorInCents
@@ -2973,7 +1363,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 totalCount
                             }}
                             description
-                            discussionCategories {{
+                            discussionCategories(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -2986,7 +1376,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     updatedAt
                                 }}
                             }}
-                            discussions(handle_pagination) {{
+                            discussions(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -2998,15 +1388,8 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     closedAt
                                     createdAt
                                     isAnswered
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
                                     category {{
                                         id
@@ -3028,7 +1411,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             diskUsage
                             forkCount
                             forkingAllowed
-                            forks(handle_pagination) {{
+                            forks(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3041,23 +1424,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     isPrivate
                                     forkCount
                                     stargazerCount
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
-                                    languages(handle_pagination) {{
+                                    languages {{
                                         totalCount
-                                        nodes {{
-                                            color
-                                            id
-                                            name
-                                        }}
                                     }}
                                     primaryLanguage {{
                                         id
@@ -3092,7 +1463,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 body
                                 about
                             }}
-                            issueTypes(handle_pagination) {{
+                            issueTypes(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3105,23 +1476,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             issues {{
                                 totalCount
                             }}
-                            labels(handle_pagination) {{
+                            labels {{
                                 totalCount
-                                nodes {{
-                                    name 
-                                    color
-                                    description
-                                    createdAt
-                                    isDefault
-                                }}
                             }}
-                            languages(handle_pagination) {{
+                            languages {{
                                 totalCount
-                                nodes {{
-                                    color
-                                    id
-                                    name
-                                }}
                             }}
                             primaryLanguage {{
                                 id
@@ -3212,23 +1571,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 isPrivate
                                 forkCount
                                 stargazerCount
-                                labels(handle_pagination) {{
+                                labels {{
                                     totalCount
-                                    nodes {{
-                                        name 
-                                        color
-                                        description
-                                        createdAt
-                                        isDefault
-                                    }}
                                 }}
-                                languages(handle_pagination) {{
+                                languages {{
                                     totalCount
-                                    nodes {{
-                                        color
-                                        id
-                                        name
-                                    }}
                                 }}
                                 primaryLanguage {{
                                     id
@@ -3248,13 +1595,13 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             }}
                             pushedAt
                             rebaseMergeAllowed
-                            refs {{
+                            refs(refPrefix: "refs/heads/", first: 100) {{
                                 totalCount
                             }}
-                            releases(handle_pagination) {{
+                            releases(first: 100) {{
                                 totalCount
                             }}
-                            repositoryTopics(handle_pagination) {{
+                            repositoryTopics(first: 100) {{
                                 totalCount
                                 nodes {{
                                    id
@@ -3277,7 +1624,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             squashMergeCommitTitle
                             sshUrl
                             stargazerCount
-                            stargazers(handle_pagination) {{
+                            stargazers(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3288,7 +1635,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     __typename
                                 }}
                             }}
-                            submodules(handle_pagination) {{
+                            submodules(first: 100) {{
                                 totalCount
                                 nodes {{
                                     branch
@@ -3310,23 +1657,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 isPrivate
                                 forkCount
                                 stargazerCount
-                                labels(handle_pagination) {{
+                                labels {{
                                     totalCount
-                                    nodes {{
-                                        name 
-                                        color
-                                        description
-                                        createdAt
-                                        isDefault
-                                    }}
                                 }}
-                                languages(handle_pagination) {{
+                                languages {{
                                     totalCount
-                                    nodes {{
-                                        color
-                                        id
-                                        name
-                                    }}
                                 }}
                                 primaryLanguage {{
                                     id
@@ -3335,7 +1670,9 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 }}       
                             }}
                             url
-                            watchers
+                            watchers {{
+                                totalCount
+                            }}
                         }}
                         headRepository {{
                             id
@@ -3346,7 +1683,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             autoMergeAllowed
                             visibility
                             forkCount
-                            collaborators(handle_pagination) {{
+                            collaborators(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3367,7 +1704,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                         commitContributionsByRepository {{
                                             url
                                             resourcePath
-                                            contributions(handle_pagination) {{
+                                            contributions {{
                                                 totalCount
                                             }}
                                             repository {{
@@ -3381,23 +1718,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                                 isPrivate
                                                 forkCount
                                                 stargazerCount
-                                                labels(handle_pagination) {{
+                                                labels {{
                                                     totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
                                                 }}
-                                                languages(handle_pagination) {{
+                                                languages {{
                                                     totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
                                                 }}
                                                 primaryLanguage {{
                                                     id
@@ -3409,9 +1734,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     contributionCalendar {{
                                         colors
                                         isHalloween
-                                        months
                                         totalContributions
-                                        weeks
                                     }}
                                     contributionYears
                                     doesEndInCurrentMonth
@@ -3420,7 +1743,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                         ... on CreatedIssueContribution {{
                                             isRestricted
                                             occurredAt
-                                            resorucePath
+                                            resourcePath
                                             url
                                             __typename
                                         }}
@@ -3462,23 +1785,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                             isPrivate
                                             forkCount
                                             stargazerCount
-                                            labels(handle_pagination) {{
+                                            labels {{
                                                 totalCount
-                                                nodes {{
-                                                    name 
-                                                    color
-                                                    description
-                                                    createdAt
-                                                    isDefault
-                                                }}
                                             }}
-                                            languages(handle_pagination) {{
+                                            languages {{
                                                 totalCount
-                                                nodes {{
-                                                    color
-                                                    id
-                                                    name
-                                                }}
                                             }}
                                             primaryLanguage {{
                                                 id
@@ -3486,11 +1797,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                                 name
                                             }}
                                         }}
-                                        contributions(handle_pagination) {{
+                                        contributions {{
                                             totalCount
                                         }}
                                     }}
-                                    pullRequestContributions(handle_pagination) {{
+                                    pullRequestContributions {{
                                         totalCount
                                     }}
                                     pullRequestContributionsByRepository {{
@@ -3505,23 +1816,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                             isPrivate
                                             forkCount
                                             stargazerCount
-                                            labels(handle_pagination) {{
+                                            labels {{
                                                 totalCount
-                                                nodes {{
-                                                    name 
-                                                    color
-                                                    description
-                                                    createdAt
-                                                    isDefault
-                                                }}
                                             }}
-                                            languages(handle_pagination) {{
+                                            languages {{
                                                 totalCount
-                                                nodes {{
-                                                    color
-                                                    id
-                                                    name
-                                                }}
                                             }}
                                             primaryLanguage {{
                                                 id
@@ -3536,92 +1835,8 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     pullRequestReviewContributions {{
                                         totalCount
                                     }}
-                                    pullRequestReviewContributionsByRepository(handle_pagination) {{
+                                    repositoryContributions {{
                                         totalCount
-                                        nodes {{
-                                            repository {{
-                                                id
-                                                databaseId
-                                                name
-                                                url
-                                                sshUrl
-                                                createdAt
-                                                description
-                                                isPrivate
-                                                forkCount
-                                                stargazerCount
-                                                labels(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
-                                                }}
-                                                languages(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
-                                                }}
-                                                primaryLanguage {{
-                                                    id
-                                                    color
-                                                    name
-                                                }}
-                                            }}
-                                            contributions {{
-                                                totalCount
-                                            }}
-                                        }}
-                                    }}
-                                    repositoryContributions(handle_pagination) {{
-                                        totalCount
-                                        nodes {{
-                                            isRestricted
-                                            occurredAt
-                                            resourcePath
-                                            url
-                                            repository {{
-                                                id
-                                                databaseId
-                                                name
-                                                url
-                                                sshUrl
-                                                createdAt
-                                                description
-                                                isPrivate
-                                                forkCount
-                                                stargazerCount
-                                                labels(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
-                                                }}
-                                                languages(handle_pagination) {{
-                                                    totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
-                                                }}
-                                                primaryLanguage {{
-                                                    id
-                                                    color
-                                                    name
-                                                }}
-                                            }}
-                                        }}
                                     }}
                                     startedAt
                                     totalCommitContributions
@@ -3634,16 +1849,13 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     totalRepositoriesWithContributedPullRequests
                                     totalRepositoryContributions
                                     }}
-                                    enterprises {{
-                                        totalCount
-                                    }}
                                     followers {{
                                         totalCount
                                     }}
                                     following {{
                                         totalCount
                                     }}
-                                    gistComments(handle_pagination) {{
+                                    gistComments(first: 100) {{
                                         totalCount
                                     }}
                                     gists {{
@@ -3657,7 +1869,6 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     isGitHubStar
                                     isHireable
                                     isSiteAdmin
-                                    isSponsoredBy
                                     issueComments {{
                                         totalCount
                                     }}
@@ -3720,7 +1931,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                         message
                                         updatedAt
                                     }}
-                                    topRepositories(handle_pagination) {{
+                                    topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                         totalCount
                                     }}
                                     totalSponsorshipAmountAsSponsorInCents
@@ -3759,7 +1970,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 totalCount
                             }}
                             description
-                            discussionCategories {{
+                            discussionCategories(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3772,7 +1983,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     updatedAt
                                 }}
                             }}
-                            discussions(handle_pagination) {{
+                            discussions(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3784,15 +1995,8 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     closedAt
                                     createdAt
                                     isAnswered
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
                                     category {{
                                         id
@@ -3814,7 +2018,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             diskUsage
                             forkCount
                             forkingAllowed
-                            forks(handle_pagination) {{
+                            forks(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3827,23 +2031,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     isPrivate
                                     forkCount
                                     stargazerCount
-                                    labels(handle_pagination) {{
+                                    labels {{
                                         totalCount
-                                        nodes {{
-                                            name 
-                                            color
-                                            description
-                                            createdAt
-                                            isDefault
-                                        }}
                                     }}
-                                    languages(handle_pagination) {{
+                                    languages {{
                                         totalCount
-                                        nodes {{
-                                            color
-                                            id
-                                            name
-                                        }}
                                     }}
                                     primaryLanguage {{
                                         id
@@ -3878,7 +2070,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 body
                                 about
                             }}
-                            issueTypes(handle_pagination) {{
+                            issueTypes(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -3891,23 +2083,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             issues {{
                                 totalCount
                             }}
-                            labels(handle_pagination) {{
+                            labels {{
                                 totalCount
-                                nodes {{
-                                    name 
-                                    color
-                                    description
-                                    createdAt
-                                    isDefault
-                                }}
                             }}
-                            languages(handle_pagination) {{
+                            languages {{
                                 totalCount
-                                nodes {{
-                                    color
-                                    id
-                                    name
-                                }}
                             }}
                             primaryLanguage {{
                                 id
@@ -3998,23 +2178,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 isPrivate
                                 forkCount
                                 stargazerCount
-                                labels(handle_pagination) {{
+                                labels {{
                                     totalCount
-                                    nodes {{
-                                        name 
-                                        color
-                                        description
-                                        createdAt
-                                        isDefault
-                                    }}
                                 }}
-                                languages(handle_pagination) {{
+                                languages {{
                                     totalCount
-                                    nodes {{
-                                        color
-                                        id
-                                        name
-                                    }}
                                 }}
                                 primaryLanguage {{
                                     id
@@ -4034,13 +2202,13 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             }}
                             pushedAt
                             rebaseMergeAllowed
-                            refs {{
+                            refs(refPrefix: "refs/heads/", first: 100) {{
                                 totalCount
                             }}
-                            releases(handle_pagination) {{
+                            releases(first: 100) {{
                                 totalCount
                             }}
-                            repositoryTopics(handle_pagination) {{
+                            repositoryTopics(first: 100) {{
                                 totalCount
                                 nodes {{
                                    id
@@ -4063,7 +2231,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                             squashMergeCommitTitle
                             sshUrl
                             stargazerCount
-                            stargazers(handle_pagination) {{
+                            stargazers(first: 100) {{
                                 totalCount
                                 nodes {{
                                     id
@@ -4074,7 +2242,7 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                     __typename
                                 }}
                             }}
-                            submodules(handle_pagination) {{
+                            submodules(first: 100) {{
                                 totalCount
                                 nodes {{
                                     branch
@@ -4096,23 +2264,11 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 isPrivate
                                 forkCount
                                 stargazerCount
-                                labels(handle_pagination) {{
+                                labels {{
                                     totalCount
-                                    nodes {{
-                                        name 
-                                        color
-                                        description
-                                        createdAt
-                                        isDefault
-                                    }}
                                 }}
-                                languages(handle_pagination) {{
+                                languages {{
                                     totalCount
-                                    nodes {{
-                                        color
-                                        id
-                                        name
-                                    }}
                                 }}
                                 primaryLanguage {{
                                     id
@@ -4121,7 +2277,9 @@ def pr_repository_query(self, pr_ids: str) -> str:
                                 }}       
                             }}
                             url
-                            watchers
+                            watchers {{
+                                totalCount
+                            }}
                         }}
                     }}
                 }}
@@ -4138,17 +2296,14 @@ def pr_user_query(self, pr_ids: str) -> str:
                 nodes(ids: [{pr_ids}]) {{
                     ... on PullRequest {{
                         id
-                        fulldatabaseId
+                        fullDatabaseId
                         editor {{
-                            id
-                            databaseId
                             login
-                            name
                             url
                             avatarUrl
                             __typename
                         }}
-                        assignedActors(handle_pagination) {{
+                        assignedActors(first: 100) {{
                             totalCount
                             nodes {{
                                 ... on Bot {{
@@ -4192,7 +2347,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                     createdAt
                                     archivedAt
                                     avatarUrl
-                                    teams(handle_pagination) {{
+                                    teams(first: 100) {{
                                         totalCount
                                         nodes {{
                                             id
@@ -4216,7 +2371,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                     teamsResourcePath
-                                    domains(handle_pagination) {{
+                                    domains(first: 100) {{
                                         totalCount
                                         nodes {{
                                             id
@@ -4227,17 +2382,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             isRequiredForPolicyEnforcement
                                             isVerified
                                             updatedAt
-                                            owner {{
-                                                id
-                                                databaseId
-                                                login
-                                                __typename
-                                            }}
+                                            owner {{                                                 __typename                                             }}
                                             verificationToken 
                                         }}
                                     }}
                                     hasSponsorsListing
-                                    isSponsoredBy
                                     isSponsoringViewer
                                     isVerified
                                     issueFields {{
@@ -4252,7 +2401,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                     mannequins {{
                                       totalCount
                                     }}
-                                    memberStatuses(handle_pagination) {{ 
+                                    memberStatuses(first: 100) {{ 
                                         totalCount
                                         nodes {{
                                             id
@@ -4265,7 +2414,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                     membersCanForkPrivateRepositories
-                                    membersWithRole(handle_pagination) {{
+                                    membersWithRole(first: 100) {{
                                       totalCount
                                       nodes {{
                                           id
@@ -4282,9 +2431,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                           createdAt
                                           commitComments {{
                                               totalCount                                            
-                                          }}
-                                          enterprises {{
-                                              totalCount
                                           }}
                                           followers {{
                                               totalCount
@@ -4303,7 +2449,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         isGitHubStar
                                         isHireable
                                         isSiteAdmin
-                                        isSponsoredBy
                                         isSponsoringViewer
                                         isViewer
                                         issueComments {{
@@ -4336,9 +2481,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         repositoryDiscussionComments {{
                                             totalCount
                                         }}
-                                        repositoryDiscussion {{
-                                            totalCount
-                                        }}
                                         resourcePath
                                         socialAccounts {{
                                             totalCount
@@ -4360,7 +2502,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             updatedAt
                                             expiresAt
                                         }}
-                                        topRepositories {{
+                                        topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                             totalCount
                                         }}
                                         totalSponsorshipAmountAsSponsorInCents
@@ -4393,9 +2535,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                           commitComments {{
                                               totalCount                                            
                                           }}
-                                          enterprises {{
-                                              totalCount
-                                          }}
                                           followers {{
                                               totalCount
                                           }}
@@ -4413,7 +2552,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         isGitHubStar
                                         isHireable
                                         isSiteAdmin
-                                        isSponsoredBy
                                         isSponsoringViewer
                                         isViewer
                                         issueComments {{
@@ -4446,9 +2584,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         repositoryDiscussionComments {{
                                             totalCount
                                         }}
-                                        repositoryDiscussion {{
-                                            totalCount
-                                        }}
                                         resourcePath
                                         socialAccounts {{
                                             totalCount
@@ -4470,7 +2605,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             updatedAt
                                             expiresAt
                                         }}
-                                        topRepositories {{
+                                        topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                             totalCount
                                         }}
                                         totalSponsorshipAmountAsSponsorInCents
@@ -4528,7 +2663,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                     createdAt
                                     archivedAt
                                     avatarUrl
-                                    teams(handle_pagination) {{
+                                    teams(first: 100) {{
                                         totalCount
                                         nodes {{
                                             id
@@ -4552,7 +2687,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                     teamsResourcePath
-                                    domains(handle_pagination) {{
+                                    domains(first: 100) {{
                                         totalCount
                                         nodes {{
                                             id
@@ -4563,17 +2698,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             isRequiredForPolicyEnforcement
                                             isVerified
                                             updatedAt
-                                            owner {{
-                                                id
-                                                databaseId
-                                                login
-                                                __typename
-                                            }}
+                                            owner {{                                                 __typename                                             }}
                                             verificationToken 
                                         }}
                                     }}
                                     hasSponsorsListing
-                                    isSponsoredBy
                                     isSponsoringViewer
                                     isVerified
                                     issueFields{{
@@ -4588,7 +2717,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                     mannequins {{
                                       totalCount 
                                     }}
-                                    memberStatuses(handle_pagination) {{ 
+                                    memberStatuses(first: 100) {{ 
                                         totalCount
                                         nodes {{
                                             id
@@ -4601,7 +2730,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                     membersCanForkPrivateRepositories
-                                    membersWithRole(handle_pagination) {{
+                                    membersWithRole(first: 100) {{
                                       totalCount
                                       nodes {{
                                           id
@@ -4618,9 +2747,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                           createdAt
                                           commitComments {{
                                               totalCount                                            
-                                          }}
-                                          enterprises {{
-                                              totalCount
                                           }}
                                           followers {{
                                               totalCount
@@ -4645,7 +2771,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         isGitHubStar
                                         isHireable
                                         isSiteAdmin
-                                        isSponsoredBy
                                         isSponsoringViewer
                                         isViewer
                                         issueComments {{
@@ -4678,9 +2803,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         repositoryDiscussionComments {{
                                             totalCount
                                         }}
-                                        repositoryDiscussion {{
-                                            totalCount
-                                        }}
                                         resourcePath
                                         socialAccounts {{
                                             totalCount
@@ -4702,7 +2824,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             updatedAt
                                             expiresAt
                                         }}
-                                        topRepositories {{
+                                        topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                             totalCount
                                         }}
                                         totalSponsorshipAmountAsSponsorInCents
@@ -4767,7 +2889,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             commitContributionsByRepository {{
                                                 url
                                                 resourcePath
-                                                contributions(handle_pagination) {{
+                                                contributions {{
                                                     totalCount
                                                 }}
                                                 repository {{
@@ -4781,23 +2903,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                     isPrivate
                                                     forkCount
                                                     stargazerCount
-                                                    labels(handle_pagination) {{
+                                                    labels {{
                                                         totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
                                                     }}
-                                                    languages(handle_pagination) {{
+                                                    languages {{
                                                         totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
                                                     }}
                                                     primaryLanguage {{
                                                         id
@@ -4809,9 +2919,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             contributionCalendar {{
                                                 colors
                                                 isHalloween
-                                                months
                                                 totalContributions
-                                                weeks
                                             }}
                                             contributionYears
                                             doesEndInCurrentMonth
@@ -4820,7 +2928,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                 ... on CreatedIssueContribution {{
                                                     isRestricted
                                                     occurredAt
-                                                    resorucePath
+                                                    resourcePath
                                                     url
                                                     __typename
                                                 }}
@@ -4862,23 +2970,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                     isPrivate
                                                     forkCount
                                                     stargazerCount
-                                                    labels(handle_pagination) {{
+                                                    labels {{
                                                         totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
                                                     }}
-                                                    languages(handle_pagination) {{
+                                                    languages {{
                                                         totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
                                                     }}
                                                     primaryLanguage {{
                                                         id
@@ -4886,11 +2982,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                         name
                                                     }}
                                                 }}
-                                                contributions(handle_pagination) {{
+                                                contributions {{
                                                     totalCount
                                                 }}
                                             }}
-                                            pullRequestContributions(handle_pagination) {{
+                                            pullRequestContributions {{
                                                 totalCount
                                             }}
                                             pullRequestContributionsByRepository {{
@@ -4905,23 +3001,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                     isPrivate
                                                     forkCount
                                                     stargazerCount
-                                                    labels(handle_pagination) {{
+                                                    labels {{
                                                         totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
                                                     }}
-                                                    languages(handle_pagination) {{
+                                                    languages {{
                                                         totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
                                                     }}
                                                     primaryLanguage {{
                                                         id
@@ -4936,92 +3020,8 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             pullRequestReviewContributions {{
                                                 totalCount
                                             }}
-                                            pullRequestReviewContributionsByRepository(handle_pagination) {{
+                                            repositoryContributions {{
                                                 totalCount
-                                                nodes {{
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                    contributions {{
-                                                        totalCount
-                                                    }}
-                                                }}
-                                            }}
-                                            repositoryContributions(handle_pagination) {{
-                                                totalCount
-                                                nodes {{
-                                                    isRestricted
-                                                    occurredAt
-                                                    resourcePath
-                                                    url
-                                                    repository {{
-                                                        id
-                                                        databaseId
-                                                        name
-                                                        url
-                                                        sshUrl
-                                                        createdAt
-                                                        description
-                                                        isPrivate
-                                                        forkCount
-                                                        stargazerCount
-                                                        labels(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                name 
-                                                                color
-                                                                description
-                                                                createdAt
-                                                                isDefault
-                                                            }}
-                                                        }}
-                                                        languages(handle_pagination) {{
-                                                            totalCount
-                                                            nodes {{
-                                                                color
-                                                                id
-                                                                name
-                                                            }}
-                                                        }}
-                                                        primaryLanguage {{
-                                                            id
-                                                            color
-                                                            name
-                                                        }}
-                                                    }}
-                                                }}
                                             }}
                                             startedAt
                                             totalCommitContributions
@@ -5034,16 +3034,13 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             totalRepositoriesWithContributedPullRequests
                                             totalRepositoryContributions
                                         }}
-                                        enterprises {{
-                                            totalCount
-                                        }}
                                         followers {{
                                             totalCount
                                         }}
                                         following {{
                                             totalCount
                                         }}
-                                        gistComments(handle_pagination) {{
+                                        gistComments(first: 100) {{
                                             totalCount
                                         }}
                                         gists {{
@@ -5057,7 +3054,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         isGitHubStar
                                         isHireable
                                         isSiteAdmin
-                                        isSponsoredBy
                                         issueComments {{
                                             totalCount
                                         }}
@@ -5120,7 +3116,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             message
                                             updatedAt
                                         }}
-                                        topRepositories(handle_pagination) {{
+                                        topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                             totalCount
                                         }}
                                         totalSponsorshipAmountAsSponsorInCents
@@ -5148,7 +3144,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             commitContributionsByRepository {{
                                                 url
                                                 resourcePath
-                                                contributions(handle_pagination) {{
+                                                contributions {{
                                                     totalCount
                                                 }}
                                                 repository {{
@@ -5162,23 +3158,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                     isPrivate
                                                     forkCount
                                                     stargazerCount
-                                                    labels(handle_pagination) {{
+                                                    labels {{
                                                         totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
                                                     }}
-                                                    languages(handle_pagination) {{
+                                                    languages {{
                                                         totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
                                                     }}
                                                     primaryLanguage {{
                                                         id
@@ -5190,9 +3174,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         contributionCalendar {{
                                             colors
                                             isHalloween
-                                            months
                                             totalContributions
-                                            weeks
                                         }}
                                         contributionYears
                                         doesEndInCurrentMonth
@@ -5201,7 +3183,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                             ... on CreatedIssueContribution {{
                                                 isRestricted
                                                 occurredAt
-                                                resorucePath
+                                                resourcePath
                                                 url
                                                 __typename
                                             }}
@@ -5243,23 +3225,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                 isPrivate
                                                 forkCount
                                                 stargazerCount
-                                                labels(handle_pagination) {{
+                                                labels {{
                                                     totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
                                                 }}
-                                                languages(handle_pagination) {{
+                                                languages {{
                                                     totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
                                                 }}
                                                 primaryLanguage {{
                                                     id
@@ -5267,11 +3237,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                     name
                                                 }}
                                             }}
-                                            contributions(handle_pagination) {{
+                                            contributions {{
                                                 totalCount
                                             }}
                                         }}
-                                        pullRequestContributions(handle_pagination) {{
+                                        pullRequestContributions {{
                                             totalCount
                                         }}
                                         pullRequestContributionsByRepository {{
@@ -5286,23 +3256,11 @@ def pr_user_query(self, pr_ids: str) -> str:
                                                 isPrivate
                                                 forkCount
                                                 stargazerCount
-                                                labels(handle_pagination) {{
+                                                labels {{
                                                     totalCount
-                                                    nodes {{
-                                                        name 
-                                                        color
-                                                        description
-                                                        createdAt
-                                                        isDefault
-                                                    }}
                                                 }}
-                                                languages(handle_pagination) {{
+                                                languages {{
                                                     totalCount
-                                                    nodes {{
-                                                        color
-                                                        id
-                                                        name
-                                                    }}
                                                 }}
                                                 primaryLanguage {{
                                                     id
@@ -5317,92 +3275,8 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         pullRequestReviewContributions {{
                                             totalCount
                                         }}
-                                        pullRequestReviewContributionsByRepository(handle_pagination) {{
+                                        repositoryContributions {{
                                             totalCount
-                                            nodes {{
-                                                repository {{
-                                                    id
-                                                    databaseId
-                                                    name
-                                                    url
-                                                    sshUrl
-                                                    createdAt
-                                                    description
-                                                    isPrivate
-                                                    forkCount
-                                                    stargazerCount
-                                                    labels(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
-                                                    }}
-                                                    languages(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
-                                                    }}
-                                                    primaryLanguage {{
-                                                        id
-                                                        color
-                                                        name
-                                                    }}
-                                                }}
-                                                contributions {{
-                                                    totalCount
-                                                }}
-                                            }}
-                                        }}
-                                        repositoryContributions(handle_pagination) {{
-                                            totalCount
-                                            nodes {{
-                                                isRestricted
-                                                occurredAt
-                                                resourcePath
-                                                url
-                                                repository {{
-                                                    id
-                                                    databaseId
-                                                    name
-                                                    url
-                                                    sshUrl
-                                                    createdAt
-                                                    description
-                                                    isPrivate
-                                                    forkCount
-                                                    stargazerCount
-                                                    labels(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            name 
-                                                            color
-                                                            description
-                                                            createdAt
-                                                            isDefault
-                                                        }}
-                                                    }}
-                                                    languages(handle_pagination) {{
-                                                        totalCount
-                                                        nodes {{
-                                                            color
-                                                            id
-                                                            name
-                                                        }}
-                                                    }}
-                                                    primaryLanguage {{
-                                                        id
-                                                        color
-                                                        name
-                                                    }}
-                                                }}
-                                            }}
                                         }}
                                         startedAt
                                         totalCommitContributions
@@ -5415,16 +3289,13 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         totalRepositoriesWithContributedPullRequests
                                         totalRepositoryContributions
                                     }}
-                                    enterprises {{
-                                        totalCount
-                                    }}
                                     followers {{
                                         totalCount
                                     }}
                                     following {{
                                         totalCount
                                     }}
-                                    gistComments(handle_pagination) {{
+                                    gistComments(first: 100) {{
                                         totalCount
                                     }}
                                     gists {{
@@ -5438,7 +3309,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                     isGitHubStar
                                     isHireable
                                     isSiteAdmin
-                                    isSponsoredBy
                                     issueComments {{
                                         totalCount
                                     }}
@@ -5501,7 +3371,7 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         message
                                         updatedAt
                                     }}
-                                    topRepositories(handle_pagination) {{
+                                    topRepositories(orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
                                         totalCount
                                     }}
                                     totalSponsorshipAmountAsSponsorInCents
@@ -5512,9 +3382,6 @@ def pr_user_query(self, pr_ids: str) -> str:
                                 __typename
                                 }}
                                 editor {{
-                                    id
-                                    databaseId
-                                    createdAt
                                     avatarUrl
                                     login
                                     resourcePath
@@ -5522,16 +3389,13 @@ def pr_user_query(self, pr_ids: str) -> str:
                                     __typename 
                                 }}
                                 mergedBy {{
-                                    id
-                                    databaseId
-                                    createdAt
                                     avatarUrl
                                     login
                                     resourcePath
                                     url
                                     __typename 
                                 }}
-                                participants(handle_pagination) {{
+                                participants(first: 100) {{
                                     totalCount
                                     nodes {{
                                         id
@@ -5544,20 +3408,13 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         __typename
                                     }}
                                 }}
-                                suggestedActors(handle_pagination) {{
+                                suggestedActors(first: 100) {{
                                     totalCount
                                     nodes {{
-                                        id
-                                        databaseId
-                                        avatarUrl
-                                        createdAt
-                                        login
-                                        resourcePath
-                                        url
                                         __typename
                                     }}
                                 }}
-                                suggestedReviewerActors(handle_pagination) {{
+                                suggestedReviewerActors(first: 100) {{
                                     totalCount
                                     nodes {{
                                         isAuthor
@@ -5570,28 +3427,14 @@ def pr_user_query(self, pr_ids: str) -> str:
                                         }}
                                     }}
                                 }}
-                                suggestedReviewers(handle_pagination) {{
-                                    totalCount
-                                    nodes {{
-                                        isAuthor
-                                        isCommenter
-                                        reviewer {{
-                                            login
-                                            avatarUrl
-                                            resourcePath
-                                            url 
-                                        }}
-                                    }}
-                                }}
-                                userContentEditConnection(handle_pagination) {{
-                                    totalCount
-                                    nodes {{
-                                        id
-                                        createdAt
-                                        deletedAt
-                                        editedAt
-                                        updatedAt
-                                        diff
+                                suggestedReviewers {{
+                                    isAuthor
+                                    isCommenter
+                                    reviewer {{
+                                        login
+                                        avatarUrl
+                                        resourcePath
+                                        url 
                                     }}
                                 }}
                             }}
@@ -5599,6 +3442,221 @@ def pr_user_query(self, pr_ids: str) -> str:
                     }}          
                 """
         return query
-             
-                            
-     
+
+
+def _after_arg(after: Optional[str]) -> str:
+    return f', after: "{after}"' if after else ""
+
+
+# Follow-up query for repository labels. Use repository IDs collected by the
+# main PR/repository queries and paginate this separately.
+def repository_labels_query(self, repository_ids: str, first: int = 100, after: Optional[str] = None) -> str:
+    query = f"""
+            query {{
+                nodes(ids: [{repository_ids}]) {{
+                    ... on Repository {{
+                        id
+                        databaseId
+                        name
+                        nameWithOwner
+                        labels(first: {first}{_after_arg(after)}) {{
+                            totalCount
+                            pageInfo {{
+                                endCursor
+                                hasNextPage
+                            }}
+                            nodes {{
+                                id
+                                name
+                                color
+                                description
+                                createdAt
+                                isDefault
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        """
+    return query
+
+
+# Follow-up query for repository languages. Use this separately from repository
+# metadata queries so language nodes do not multiply inside nested PR/user paths.
+def repository_languages_query(self, repository_ids: str, first: int = 100, after: Optional[str] = None) -> str:
+    query = f"""
+            query {{
+                nodes(ids: [{repository_ids}]) {{
+                    ... on Repository {{
+                        id
+                        databaseId
+                        name
+                        nameWithOwner
+                        languages(first: {first}{_after_arg(after)}) {{
+                            totalCount
+                            totalSize
+                            pageInfo {{
+                                endCursor
+                                hasNextPage
+                            }}
+                            edges {{
+                                size
+                                node {{
+                                    id
+                                    color
+                                    name
+                                }}
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        """
+    return query
+
+
+# Follow-up query for user top repositories. Use user IDs collected from PR
+# authors, commenters, reviewers, assignees, or participants.
+def user_top_repositories_query(self, user_ids: str, first: int = 100, after: Optional[str] = None) -> str:
+    query = f"""
+            query {{
+                nodes(ids: [{user_ids}]) {{
+                    ... on User {{
+                        id
+                        databaseId
+                        login
+                        topRepositories(first: {first}{_after_arg(after)}, orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+                            totalCount
+                            pageInfo {{
+                                endCursor
+                                hasNextPage
+                            }}
+                            nodes {{
+                                id
+                                databaseId
+                                name
+                                nameWithOwner
+                                url
+                                sshUrl
+                                createdAt
+                                description
+                                isPrivate
+                                forkCount
+                                stargazerCount
+                                labels {{
+                                    totalCount
+                                }}
+                                primaryLanguage {{
+                                    id
+                                    color
+                                    name
+                                }}
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        """
+    return query
+
+
+# Follow-up query for user contributions by repository. This keeps contribution
+# nodes out of the main PR queries, avoiding GitHub's 500k possible-node cap.
+def user_contributions_by_repository_query(
+    self,
+    user_ids: str,
+    first: int = 100,
+    after: Optional[str] = None,
+) -> str:
+    query = f"""
+            query {{
+                nodes(ids: [{user_ids}]) {{
+                    ... on User {{
+                        id
+                        databaseId
+                        login
+                        contributionsCollection {{
+                            commitContributionsByRepository {{
+                                repository {{
+                                    id
+                                    databaseId
+                                    name
+                                    nameWithOwner
+                                    url
+                                    labels {{
+                                        totalCount
+                                    }}
+                                }}
+                                contributions(first: {first}{_after_arg(after)}) {{
+                                    totalCount
+                                    pageInfo {{
+                                        endCursor
+                                        hasNextPage
+                                    }}
+                                    nodes {{
+                                        isRestricted
+                                        occurredAt
+                                        resourcePath
+                                        url
+                                        __typename
+                                    }}
+                                }}
+                            }}
+                            issueContributionsByRepository {{
+                                repository {{
+                                    id
+                                    databaseId
+                                    name
+                                    nameWithOwner
+                                    url
+                                    labels {{
+                                        totalCount
+                                    }}
+                                }}
+                                contributions(first: {first}{_after_arg(after)}) {{
+                                    totalCount
+                                    pageInfo {{
+                                        endCursor
+                                        hasNextPage
+                                    }}
+                                    nodes {{
+                                        isRestricted
+                                        occurredAt
+                                        resourcePath
+                                        url
+                                        __typename
+                                    }}
+                                }}
+                            }}
+                            pullRequestContributionsByRepository {{
+                                repository {{
+                                    id
+                                    databaseId
+                                    name
+                                    nameWithOwner
+                                    url
+                                    labels {{
+                                        totalCount
+                                    }}
+                                }}
+                                contributions(first: {first}{_after_arg(after)}) {{
+                                    totalCount
+                                    pageInfo {{
+                                        endCursor
+                                        hasNextPage
+                                    }}
+                                    nodes {{
+                                        isRestricted
+                                        occurredAt
+                                        resourcePath
+                                        url
+                                        __typename
+                                    }}
+                                }}
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        """
+    return query

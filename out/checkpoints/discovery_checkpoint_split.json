@@ -1,0 +1,73 @@
+﻿{
+  "version": 1,
+  "run": {
+    "query_file": "C:\\mosaic\\mosaic\\query_rahul2026 copy.py",
+    "out_dir": "C:\\mosaic\\mosaic\\out\\query_benchmark\\split",
+    "run_type": "split",
+    "repo_filter": "repo:microsoft/vscode",
+    "start_date": "2024-01-01",
+    "end_date": "2024-01-31",
+    "first_prs": 5,
+    "max_pr_ids": 5,
+    "max_repo_ids": 5,
+    "max_user_ids": 5
+  },
+  "start_date": "2024-01-01",
+  "end_date": "2024-01-31",
+  "phase": "pr_review_query",
+  "clause_index": 1,
+  "current_start": "2024-01-01",
+  "count_in_window": 2,
+  "completed_queries": [
+    "backbone_pr_query",
+    "pr_review_query"
+  ],
+  "payload_files": {
+    "backbone_pr_query": "backbone_pr_query.json",
+    "pr_review_query": "pr_review_query.json"
+  },
+  "summary": [
+    {
+      "query": "backbone_pr_query",
+      "http_status": 200,
+      "elapsed_ms": 3273.451399989426,
+      "response_bytes": 23404,
+      "error_count": 0,
+      "errors": []
+    },
+    {
+      "query": "pr_review_query",
+      "http_status": 200,
+      "elapsed_ms": 846.785900008399,
+      "response_bytes": 27815,
+      "error_count": 0,
+      "errors": []
+    }
+  ],
+  "usage_rows": [
+    {
+      "query": "backbone_pr_query",
+      "graphql_before": 4884,
+      "graphql_after": 4883,
+      "graphql_consumed": 1,
+      "graphql_limit": 5000
+    },
+    {
+      "query": "pr_review_query",
+      "graphql_before": 4883,
+      "graphql_after": 4868,
+      "graphql_consumed": 15,
+      "graphql_limit": 5000
+    }
+  ],
+  "pr_ids": [
+    "PR_kwDOAn8RLM5jDuKe",
+    "PR_kwDOAn8RLM5jGPen",
+    "PR_kwDOAn8RLM5jGZ6I",
+    "PR_kwDOAn8RLM5jH2gw",
+    "PR_kwDOAn8RLM5jH958"
+  ],
+  "repository_ids": [],
+  "user_ids": [],
+  "updated_at": "2026-06-13T01:01:39Z"
+}

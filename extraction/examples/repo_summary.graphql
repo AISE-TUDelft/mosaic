@@ -1,0 +1,31 @@
+query RepoSummary($owner: String!, $repo: String!) {
+  repository(owner: $owner, name: $repo) {
+    id
+    nameWithOwner
+    stargazerCount
+    forkCount
+    issues(first: 10, states: OPEN) {
+      totalCount
+      nodes {
+        id
+        number
+        title
+      }
+    }
+    pullRequests(first: 10, states: OPEN) {
+      totalCount
+      nodes {
+        id
+        number
+        title
+      }
+    }
+  }
+  rateLimit {
+    cost
+    limit
+    remaining
+    used
+    resetAt
+  }
+}
